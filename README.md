@@ -1,3 +1,5 @@
+Site is live at - https://gigachad-suryansh.github.io/Physics-ground/
+
 # Physics Playground — Interactive Physics Lab
 
 An interactive digital physics laboratory built for real-time scientific experimentation, conceptual intuition, and rigorous numerical modeling.
