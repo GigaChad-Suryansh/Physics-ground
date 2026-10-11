@@ -1,0 +1,28 @@
+import React from 'react';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { LandingPage } from './pages/LandingPage';
+import { ProjectileMotionPage } from './simulations/projectile/ProjectileMotionPage';
+import { ForcesPage } from './simulations/forces/ForcesPage';
+import { OrbitalPage } from './simulations/orbital/OrbitalPage';
+import { WavesPage } from './simulations/waves/WavesPage';
+import { CircuitsPage } from './simulations/circuits/CircuitsPage';
+import { OpticsPage } from './simulations/optics/OpticsPage';
+
+export const App: React.FC = () => {
+  return (
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/sim/projectile" element={<ProjectileMotionPage />} />
+        <Route path="/sim/forces" element={<ForcesPage />} />
+        <Route path="/sim/orbital" element={<OrbitalPage />} />
+        <Route path="/sim/waves" element={<WavesPage />} />
+        <Route path="/sim/circuits" element={<CircuitsPage />} />
+        <Route path="/sim/optics" element={<OpticsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </HashRouter>
+  );
+};
+
+export default App;
