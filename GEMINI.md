@@ -6,7 +6,7 @@ Maintain and improve this existing React/TypeScript/Vite Physics Playground at G
 ## Required decision order for every run
 1. Read this file, `roadmap/physics-concepts.json`, and `roadmap/progress.json`.
 2. Inspect the existing code, tests, deployment workflow, current simulation modules, and any previous run report.
-3. Run the baseline tests and production build. The workflow supplies the baseline exit statuses: tests=${{ steps.baseline.outputs.test_exit }}, build=${{ steps.baseline.outputs.build_exit }}.
+3. Run the baseline tests and production build. The workflow passes the baseline exit codes into the agent prompt; use them to prioritize existing failures.
 4. **Bug-first gate:** if a reproducible bug, failing test, broken interaction, incorrect physics result, or accessibility issue is found, work on existing defects first. Do not start a new concept in that run while any confirmed actionable defect remains unresolved.
 5. If the baseline is failing, investigate and repair the root cause. Never delete, skip, or weaken a test to make the suite green.
 6. Only when the baseline is healthy and the audit finds no actionable bugs, select the lowest-numbered eligible unfinished concept in the fixed roadmap.
