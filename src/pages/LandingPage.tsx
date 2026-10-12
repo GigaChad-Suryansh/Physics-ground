@@ -84,7 +84,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <h3 className="font-semibold text-slate-200 text-sm">Real Numerical Solvers</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Equipped with Symplectic Velocity Verlet, Euler-Cromer, and analytical kinematic solvers with zero fake measurements.
+              Runge–Kutta (RK4) and symplectic Velocity Verlet integrators, plus closed-form solutions to check them against.
             </p>
           </div>
 

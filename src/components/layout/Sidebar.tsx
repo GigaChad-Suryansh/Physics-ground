@@ -21,7 +21,7 @@ export const SIMULATION_MODULES = [
     icon: Compass,
     color: 'text-sky-400',
     bgColor: 'bg-sky-500/10',
-    description: 'Kinematics, 2D trajectory trails, launch velocity vectors, and atmospheric drag.',
+    description: 'Kinematics, 2D trajectory trails, launch velocity vectors, and quadratic air drag.',
     badge: 'Core Mechanics',
   },
   {
@@ -32,7 +32,7 @@ export const SIMULATION_MODULES = [
     icon: Activity,
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500/10',
-    description: 'F = ma, static vs kinetic friction, free-body force breakdown, and incline planes.',
+    description: 'F = ma, static vs kinetic friction, free-body force breakdown, and angled pushes.',
     badge: 'Newtonian',
   },
   {

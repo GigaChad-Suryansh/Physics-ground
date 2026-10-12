@@ -109,6 +109,13 @@ export function calculateForces(params: ForcesParams, velocity: number): ForceBr
 
 /**
  * Step the forces simulation forward by dt.
+ *
+ * The net force is constant over a step (it only changes when the block
+ * starts or stops), so the kinematics are exact:
+ *   x += v·dt + ½·a·dt²,   v += a·dt
+ * If kinetic friction brings the block to rest part-way through the step, the
+ * block travels only until it stops (t = −v/a) and then stays at rest — it
+ * never "rolls backwards" or loses that last bit of distance.
  */
 export function stepForces(
   state: ForcesState,
@@ -117,20 +124,22 @@ export function stepForces(
 ): ForcesState {
   const forces = calculateForces(params, state.velocity);
   const acceleration = params.mass > 0 ? forces.net.x / params.mass : 0;
-  
-  // Semi-implicit Euler
-  let newVelocity = state.velocity + acceleration * dt;
-  
-  // Check if friction should stop the object
-  // If velocity changes sign due to friction, clamp to zero
-  if (forces.frictionType === 'kinetic' && state.velocity * newVelocity < 0) {
+
+  const v0 = state.velocity;
+  let newVelocity = v0 + acceleration * dt;
+  let displacement: number;
+
+  if (forces.frictionType === 'kinetic' && v0 !== 0 && v0 * newVelocity < 0) {
+    // Friction stopped the block mid-step.
+    const tStop = -v0 / acceleration;
+    displacement = v0 * tStop + 0.5 * acceleration * tStop * tStop;
     newVelocity = 0;
+  } else {
+    displacement = v0 * dt + 0.5 * acceleration * dt * dt;
   }
-  
-  const newPosition = state.position + newVelocity * dt;
-  
+
   return {
-    position: newPosition,
+    position: state.position + displacement,
     velocity: newVelocity,
     acceleration,
     time: state.time + dt,
