@@ -45,6 +45,10 @@ export interface CircuitAnalysis {
   totalPower: number;         // W
   resistors: Resistor[];
   batteryVoltage: number;
+  /** Voltage across the battery terminals: V − I·r_internal */
+  terminalVoltage: number;
+  /** Power lost in the battery's internal resistance: I²·r_internal */
+  internalPower: number;
   isCircuitComplete: boolean;
 }
 
@@ -115,6 +119,8 @@ export function analyzeCircuit(config: CircuitConfig): CircuitAnalysis {
       totalPower: 0,
       resistors: config.resistors.map(r => ({ ...r, voltageDrop: 0, current: 0, power: 0 })),
       batteryVoltage: config.battery.voltage,
+      terminalVoltage: config.battery.voltage,
+      internalPower: 0,
       isCircuitComplete: false,
     };
   }
@@ -165,7 +171,8 @@ export function analyzeCircuit(config: CircuitConfig): CircuitAnalysis {
       for (const group of parallelGroups) {
         const groupResistors = config.resistors.filter(r => group.includes(r.id));
         const eqR = parallelResistance(groupResistors.map(r => r.resistance));
-        const key = group.sort().join('-');
+        // Copy before sorting — Array.sort mutates, and `group` belongs to the caller's config.
+        const key = [...group].sort().join('-');
         parallelGroupResistances.set(key, { eqR, ids: group });
         R_series_part += eqR;
       }
@@ -226,6 +233,8 @@ export function analyzeCircuit(config: CircuitConfig): CircuitAnalysis {
     totalPower: V * totalCurrent,
     resistors,
     batteryVoltage: V,
+    terminalVoltage: V - totalCurrent * r_int,
+    internalPower: totalCurrent * totalCurrent * r_int,
     isCircuitComplete: true,
   };
 }

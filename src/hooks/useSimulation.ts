@@ -3,7 +3,8 @@
  * Provides reactive state and control methods.
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { SimulationEngine, SimulationCallbacks, SimulationState } from '../engine/SimulationEngine';
+import { SimulationEngine } from '../engine/SimulationEngine';
+import type { SimulationCallbacks, SimulationState } from '../engine/SimulationEngine';
 
 export interface UseSimulationOptions {
   dt?: number;
@@ -18,9 +19,14 @@ export interface UseSimulationReturn {
   pause: () => void;
   reset: () => void;
   step: () => void;
+  /** Stop the clock for good (e.g. the projectile landed). Start restarts the run. */
+  finish: () => void;
+  /** Play, but if the run already finished, restart it from the beginning first. */
+  playOrRestart: () => void;
   setSpeed: (speed: number) => void;
   isRunning: boolean;
   isPaused: boolean;
+  isFinished: boolean;
 }
 
 export function useSimulation(options: UseSimulationOptions): UseSimulationReturn {
@@ -32,6 +38,7 @@ export function useSimulation(options: UseSimulationOptions): UseSimulationRetur
     frameCount: 0,
   }));
 
+  // Always call the latest callbacks without recreating the engine.
   const callbacksRef = useRef<SimulationCallbacks>(options);
   callbacksRef.current = {
     onStep: options.onStep,
@@ -64,14 +71,23 @@ export function useSimulation(options: UseSimulationOptions): UseSimulationRetur
     };
   }, [engine]);
 
+  const play = useCallback(() => engine.play(), [engine]);
+  const reset = useCallback(() => engine.reset(), [engine]);
+
   return {
     state,
-    play: useCallback(() => engine.play(), [engine]),
+    play,
     pause: useCallback(() => engine.pause(), [engine]),
-    reset: useCallback(() => engine.reset(), [engine]),
+    reset,
     step: useCallback(() => engine.step(), [engine]),
+    finish: useCallback(() => engine.finish(), [engine]),
+    playOrRestart: useCallback(() => {
+      if (engine.getState().status === 'finished') engine.reset();
+      engine.play();
+    }, [engine]),
     setSpeed: useCallback((s: number) => engine.setSpeed(s), [engine]),
     isRunning: state.status === 'running',
     isPaused: state.status === 'paused',
+    isFinished: state.status === 'finished',
   };
 }

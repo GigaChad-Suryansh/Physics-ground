@@ -36,12 +36,15 @@ export interface SHMParams {
   damping: number;        // damping coefficient (0 = undamped)
 }
 
+export type DampingRegime = 'undamped' | 'underdamped' | 'critical' | 'overdamped';
+
 export interface SHMState {
   displacement: number;   // m
   velocity: number;       // m/s
   acceleration: number;   // m/s²
   time: number;
   springForce: number;    // N
+  dampingForce: number;   // N (−c·v)
   kineticEnergy: number;
   potentialEnergy: number;
   totalEnergy: number;
@@ -152,34 +155,87 @@ export function springConstant(mass: number, frequency: number): number {
 }
 
 /**
- * SHM state at time t (undamped).
- * x(t) = A·cos(ωt)
- * v(t) = -Aω·sin(ωt)
- * a(t) = -Aω²·cos(ωt)
+ * Which damping regime the oscillator is in.
+ * Compares γ = c/2m (decay rate) with ω₀ = 2πf (natural angular frequency).
+ */
+export function getDampingRegime(params: SHMParams): DampingRegime {
+  if (!(params.damping > 0)) return 'undamped';
+  const omega0 = angularFrequency(params.frequency);
+  const gamma = params.damping / (2 * params.mass);
+  const rel = (gamma - omega0) / omega0;
+  if (Math.abs(rel) < 1e-6) return 'critical';
+  return gamma < omega0 ? 'underdamped' : 'overdamped';
+}
+
+/**
+ * Standing wave from two equal counter-propagating waves:
+ * y(x,t) = 2A·sin(kx)·cos(ωt)
+ */
+export function standingWaveDisplacement(
+  params: WaveParams,
+  x: number,
+  t: number
+): number {
+  const k = waveNumber(params.wavelength);
+  const omega = angularFrequency(params.frequency);
+  return 2 * params.amplitude * Math.sin(k * x) * Math.cos(omega * t);
+}
+
+/**
+ * Mass on a spring released from rest at x = A, solving  m·x'' + c·x' + k·x = 0
+ * exactly (closed form) for every damping regime:
+ *
+ *   undamped      x = A·cos(ω₀t)
+ *   underdamped   x = A·e^(−γt)·[cos(ω_d t) + (γ/ω_d)·sin(ω_d t)],  ω_d = √(ω₀² − γ²)
+ *   critical      x = A·(1 + γt)·e^(−γt)
+ *   overdamped    x = A/(2s)·[r₁e^(r₂t) − r₂e^(r₁t)],  r₁,₂ = −γ ± s,  s = √(γ² − ω₀²)
+ *
+ * where ω₀ = 2πf, γ = c/(2m). All of them satisfy x(0) = A and x'(0) = 0.
  */
 export function getSHMState(params: SHMParams, t: number): SHMState {
-  const omega = angularFrequency(params.frequency);
+  const omega0 = angularFrequency(params.frequency);
   const k = springConstant(params.mass, params.frequency);
+  const c = Math.max(0, params.damping);
+  const A = params.amplitude;
+  const gamma = c / (2 * params.mass);
+  const regime = getDampingRegime(params);
 
   let displacement: number;
   let velocity: number;
 
-  if (params.damping > 0) {
-    // Under-damped SHM: x(t) = A·e^(-γt)·cos(ω't)
-    const gamma = params.damping / (2 * params.mass);
-    const omegaPrime = Math.sqrt(Math.max(0, omega * omega - gamma * gamma));
-    const envelope = Math.exp(-gamma * t);
-    displacement = params.amplitude * envelope * Math.cos(omegaPrime * t);
-    velocity = params.amplitude * envelope * (
-      -gamma * Math.cos(omegaPrime * t) - omegaPrime * Math.sin(omegaPrime * t)
-    );
-  } else {
-    displacement = params.amplitude * Math.cos(omega * t);
-    velocity = -params.amplitude * omega * Math.sin(omega * t);
+  switch (regime) {
+    case 'undamped':
+      displacement = A * Math.cos(omega0 * t);
+      velocity = -A * omega0 * Math.sin(omega0 * t);
+      break;
+    case 'underdamped': {
+      const wd = Math.sqrt(omega0 * omega0 - gamma * gamma);
+      const env = Math.exp(-gamma * t);
+      displacement = A * env * (Math.cos(wd * t) + (gamma / wd) * Math.sin(wd * t));
+      velocity = -A * ((omega0 * omega0) / wd) * env * Math.sin(wd * t);
+      break;
+    }
+    case 'critical': {
+      const env = Math.exp(-gamma * t);
+      displacement = A * (1 + gamma * t) * env;
+      velocity = -A * gamma * gamma * t * env;
+      break;
+    }
+    case 'overdamped': {
+      const s = Math.sqrt(gamma * gamma - omega0 * omega0);
+      const r1 = -gamma + s;
+      const r2 = -gamma - s;
+      const e1 = Math.exp(r1 * t);
+      const e2 = Math.exp(r2 * t);
+      displacement = (A / (2 * s)) * (r1 * e2 - r2 * e1);
+      velocity = ((A * omega0 * omega0) / (2 * s)) * (e2 - e1);
+      break;
+    }
   }
 
-  const acceleration = -(k / params.mass) * displacement;
   const springForce = -k * displacement;
+  const dampingForce = -c * velocity;
+  const acceleration = (springForce + dampingForce) / params.mass;
   const kineticEnergy = 0.5 * params.mass * velocity * velocity;
   const potentialEnergy = 0.5 * k * displacement * displacement;
 
@@ -189,6 +245,7 @@ export function getSHMState(params: SHMParams, t: number): SHMState {
     acceleration,
     time: t,
     springForce,
+    dampingForce,
     kineticEnergy,
     potentialEnergy,
     totalEnergy: kineticEnergy + potentialEnergy,

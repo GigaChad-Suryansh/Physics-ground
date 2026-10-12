@@ -1,47 +1,65 @@
 /**
  * Geometric Optics Module
- * 
- * Implements thin lens and mirror equations using the standard sign convention:
- * 
- * Sign Convention (Real-Is-Positive for mirrors, Cartesian for lenses):
- * - Object distance (u): negative when object is on same side as incoming light
- * - Image distance (v): positive for real images, negative for virtual
- * - Focal length (f): positive for converging (concave mirror / convex lens),
- *                      negative for diverging (convex mirror / concave lens)
- * 
- * Equations:
- *   Mirror equation: 1/f = 1/v + 1/u
- *   Lens equation:   1/f = 1/v - 1/u  (with sign convention)
- *   Magnification:   m = -v/u (mirrors), m = v/u (lenses)
- *   
- * For this simulation, we use the simplified convention:
- *   1/v = 1/f - 1/u  =>  v = uf/(u - f)
- *   where u is object distance (positive), f is focal length (signed)
+ *
+ * Thin lenses and spherical mirrors, using the "real-is-positive" convention
+ * with every distance measured as a positive number from the optical element:
+ *
+ *   u  object distance (always > 0 here — the object is real)
+ *   v  image distance:  v > 0  → real image,   v < 0 → virtual image
+ *   f  focal length:    f > 0  → converging (convex lens / concave mirror)
+ *                       f < 0  → diverging  (concave lens / convex mirror)
+ *
+ * The same pair of equations describes all four elements:
+ *
+ *   1/f = 1/u + 1/v      ⇒   v = u·f / (u − f)
+ *   m   = h_i / h_o = −v/u        (m < 0 ⇒ inverted, m > 0 ⇒ erect)
+ *
+ * Where the image *sits* differs: for a lens a real image is on the far side
+ * (x = +v), for a mirror a real image is on the object's side (x = −v).
+ * In both cases a virtual image has v < 0 and so lands on the opposite side
+ * of where a real one would — see {@link imageX}.
+ *
+ * Coordinates for ray diagrams: element at x = 0, light travels left → right,
+ * object at x = −u, +y is up.
  */
 
-export type OpticalElement = 'concave-mirror' | 'convex-mirror' | 'converging-lens' | 'diverging-lens';
+export type OpticalElement =
+  | 'concave-mirror'
+  | 'convex-mirror'
+  | 'converging-lens'
+  | 'diverging-lens';
 
 export interface OpticsParams {
   element: OpticalElement;
-  focalLength: number;      // cm (absolute value; sign determined by element type)
-  objectDistance: number;    // cm (positive, measured from element)
-  objectHeight: number;     // cm (positive upward)
+  focalLength: number; // cm (absolute value; sign determined by element type)
+  objectDistance: number; // cm (positive, measured from element)
+  objectHeight: number; // cm (positive upward)
 }
 
 export interface OpticsResult {
-  imageDistance: number;     // cm (positive = real, negative = virtual)
-  imageHeight: number;      // cm (sign indicates orientation)
+  imageDistance: number; // cm (positive = real, negative = virtual)
+  imageHeight: number; // cm (negative ⇒ inverted)
   magnification: number;
   isReal: boolean;
   isInverted: boolean;
   isEnlarged: boolean;
-  nature: string;           // description: "Real, Inverted, Diminished", etc.
+  nature: string; // "Real, Inverted, Diminished", etc.
   signedFocalLength: number;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
 export interface Ray {
-  start: { x: number; y: number };
-  points: { x: number; y: number }[];
+  /** Solid path: object tip → element → far end of the drawn ray. */
+  points: Point[];
+  /**
+   * Dashed back-extension from the element to the image tip. Present only when
+   * the image is virtual (rays diverge, so only their extensions meet).
+   */
+  virtualExtension?: Point[];
   color: string;
   label: string;
 }
@@ -53,10 +71,15 @@ export const DEFAULT_OPTICS_PARAMS: OpticsParams = {
   objectHeight: 5,
 };
 
+/** How far (in cm) past the element rays are extended; the canvas clips them. */
+const RAY_EXTENT = 400;
+
+export function isMirror(element: OpticalElement): boolean {
+  return element === 'concave-mirror' || element === 'convex-mirror';
+}
+
 /**
- * Get signed focal length based on element type.
- * Converging elements (concave mirror, convex lens): positive f
- * Diverging elements (convex mirror, concave lens): negative f
+ * Signed focal length: positive for converging elements, negative for diverging.
  */
 export function getSignedFocalLength(element: OpticalElement, f: number): number {
   const absF = Math.abs(f);
@@ -71,14 +94,13 @@ export function getSignedFocalLength(element: OpticalElement, f: number): number
 }
 
 /**
- * Calculate image properties using the thin lens/mirror equation.
- * Uses the convention: 1/v = 1/f - 1/u  (v = uf/(u-f))
+ * Calculate image properties using 1/f = 1/u + 1/v and m = −v/u.
  */
 export function calculateImage(params: OpticsParams): OpticsResult {
   const f = getSignedFocalLength(params.element, params.focalLength);
-  const u = params.objectDistance;
-  
-  // Guard: object at focal point creates image at infinity
+  const u = Math.max(params.objectDistance, 1e-6);
+
+  // Object at the focal point: rays leave parallel, image at infinity.
   if (Math.abs(u - f) < 0.001) {
     return {
       imageDistance: Infinity,
@@ -92,24 +114,20 @@ export function calculateImage(params: OpticsParams): OpticsResult {
     };
   }
 
-  // v = uf / (u - f)
   const v = (u * f) / (u - f);
-  
-  // Magnification: m = -v/u for mirrors, v/u for lenses
-  const isMirror = params.element === 'concave-mirror' || params.element === 'convex-mirror';
-  const m = isMirror ? -(v / u) : (v / u);
-  
+  const m = -v / u;
+
   const imageHeight = m * params.objectHeight;
   const isReal = v > 0;
   const isInverted = m < 0;
-  const isEnlarged = Math.abs(m) > 1;
+  const isSameSize = Math.abs(Math.abs(m) - 1) < 0.005;
+  const isEnlarged = !isSameSize && Math.abs(m) > 1;
 
-  let nature = '';
-  nature += isReal ? 'Real' : 'Virtual';
-  nature += ', ';
-  nature += isInverted ? 'Inverted' : 'Erect';
-  nature += ', ';
-  nature += isEnlarged ? 'Enlarged' : (Math.abs(m) === 1 ? 'Same size' : 'Diminished');
+  const nature = [
+    isReal ? 'Real' : 'Virtual',
+    isInverted ? 'Inverted' : 'Erect',
+    isSameSize ? 'Same size' : isEnlarged ? 'Enlarged' : 'Diminished',
+  ].join(', ');
 
   return {
     imageDistance: v,
@@ -124,87 +142,104 @@ export function calculateImage(params: OpticsParams): OpticsResult {
 }
 
 /**
- * Generate principal rays for ray diagram visualization.
- * Returns three standard rays used in geometric optics.
+ * Horizontal position (cm, element at 0) of the image for ray-diagram drawing.
+ * Lens: real image is on the far side (+v). Mirror: real image is on the
+ * object side (−v); a virtual image (v < 0) therefore lands behind the mirror.
  */
-export function generatePrincipalRays(
-  params: OpticsParams,
-  result: OpticsResult
-): Ray[] {
+export function imageX(element: OpticalElement, v: number): number {
+  return isMirror(element) ? -v : v;
+}
+
+export interface FocalMarker {
+  x: number; // cm, element at 0
+  label: string;
+  virtual: boolean;
+}
+
+/**
+ * Focal / centre-of-curvature markers to draw for the given element.
+ * Lenses have a focal point on each side; mirrors only on their own axis —
+ * concave mirrors in front (real), convex mirrors behind (virtual).
+ */
+export function getFocalMarkers(element: OpticalElement, absF: number): FocalMarker[] {
+  const f = Math.abs(absF);
+  switch (element) {
+    case 'converging-lens':
+    case 'diverging-lens':
+      return [
+        { x: -f, label: 'F', virtual: false },
+        { x: f, label: "F'", virtual: false },
+        { x: -2 * f, label: '2F', virtual: false },
+        { x: 2 * f, label: "2F'", virtual: false },
+      ];
+    case 'concave-mirror':
+      return [
+        { x: -f, label: 'F', virtual: false },
+        { x: -2 * f, label: 'C', virtual: false },
+      ];
+    case 'convex-mirror':
+      return [
+        { x: f, label: 'F', virtual: true },
+        { x: 2 * f, label: 'C', virtual: true },
+      ];
+  }
+}
+
+/** Extend a ray that leaves `from` along `dir` until it reaches x = xEnd. */
+function extendTo(from: Point, dir: Point, xEnd: number): Point {
+  if (Math.abs(dir.x) < 1e-12) return { x: xEnd, y: from.y };
+  const t = (xEnd - from.x) / dir.x;
+  return { x: xEnd, y: from.y + dir.y * t };
+}
+
+/**
+ * Generate the three principal rays for the ray diagram.
+ *
+ *   1. Parallel to the axis → passes through (or appears to come from) F.
+ *   2. Aimed at the optical centre / pole → lens: undeviated, mirror: reflected
+ *      symmetrically.
+ *   3. Aimed through (or toward) the near focal point → leaves parallel.
+ *
+ * The post-element direction of each ray is derived analytically from the
+ * geometry (not from the computed image), so the diagram independently
+ * confirms the lens/mirror equation: every ray passes through the image tip.
+ */
+export function generatePrincipalRays(params: OpticsParams, result: OpticsResult): Ray[] {
   const f = result.signedFocalLength;
-  const u = params.objectDistance;
+  const u = Math.max(params.objectDistance, 1e-6);
   const h = params.objectHeight;
   const v = result.imageDistance;
   const ih = result.imageHeight;
-  const isMirror = params.element === 'concave-mirror' || params.element === 'convex-mirror';
-  
-  const rays: Ray[] = [];
-  const elementX = 0; // optical element at origin
+  const mirror = isMirror(params.element);
 
-  if (!isFinite(v)) return rays;
+  if (!isFinite(v)) return [];
 
-  if (!isMirror) {
-    // LENS RAYS
+  const absF = Math.abs(f);
+  const sgnF = f >= 0 ? 1 : -1;
+  const objTip: Point = { x: -u, y: h };
+  // Height where the "through the focal point" ray meets the element.
+  const y3 = (-h * f) / (u - f);
+  const dirSign = mirror ? -1 : 1; // rays continue left after a mirror, right after a lens
+  const xEnd = dirSign * RAY_EXTENT;
+  const imageTip: Point = { x: imageX(params.element, v), y: ih };
 
-    // Ray 1: Parallel to axis → through focal point
-    rays.push({
-      start: { x: -u, y: h },
-      points: [
-        { x: -u, y: h },
-        { x: elementX, y: h },
-        { x: v, y: ih },
-      ],
-      color: '#ef4444',
-      label: 'Parallel ray',
-    });
+  const build = (hit: Point, dir: Point, color: string, label: string): Ray => ({
+    points: [objTip, hit, extendTo(hit, dir, xEnd)],
+    virtualExtension: v < 0 ? [hit, imageTip] : undefined,
+    color,
+    label,
+  });
 
-    // Ray 2: Through center → undeviated
-    rays.push({
-      start: { x: -u, y: h },
-      points: [
-        { x: -u, y: h },
-        { x: elementX, y: 0 },
-        { x: v, y: ih },
-      ],
-      color: '#22c55e',
-      label: 'Central ray',
-    });
+  // Direction vectors after the element (x component sign encodes forward/back).
+  const dir1: Point = mirror
+    ? { x: -absF, y: -h * sgnF } // parallel ray → toward / away from F
+    : { x: absF, y: -h * sgnF };
+  const dir2: Point = mirror ? { x: -u, y: -h } : { x: u, y: -h };
+  const dir3: Point = { x: dirSign, y: 0 };
 
-    // Ray 3: Through focal point → parallel after lens
-    rays.push({
-      start: { x: -u, y: h },
-      points: [
-        { x: -u, y: h },
-        { x: elementX, y: h * (1 - u / (u - f)) + h * (u / (u - f)) },
-        { x: v, y: ih },
-      ],
-      color: '#3b82f6',
-      label: 'Focal ray',
-    });
-  } else {
-    // MIRROR RAYS - similar but reflected
-    rays.push({
-      start: { x: -u, y: h },
-      points: [
-        { x: -u, y: h },
-        { x: elementX, y: h },
-        { x: -Math.abs(v), y: ih },
-      ],
-      color: '#ef4444',
-      label: 'Parallel ray',
-    });
-
-    rays.push({
-      start: { x: -u, y: h },
-      points: [
-        { x: -u, y: h },
-        { x: elementX, y: 0 },
-        { x: -Math.abs(v), y: ih },
-      ],
-      color: '#22c55e',
-      label: 'Center ray',
-    });
-  }
-
-  return rays;
+  return [
+    build({ x: 0, y: h }, dir1, '#ef4444', 'Parallel ray'),
+    build({ x: 0, y: 0 }, dir2, '#22c55e', mirror ? 'Pole ray' : 'Central ray'),
+    build({ x: 0, y: y3 }, dir3, '#3b82f6', 'Focal ray'),
+  ];
 }

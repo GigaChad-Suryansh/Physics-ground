@@ -139,20 +139,29 @@ export class SimulationEngine {
       // Accumulate scaled time
       this.accumulator += wallDt * this.state.speed;
 
-      // Fixed-step integration
+      // Fixed-step integration. The cap scales with speed so that fast-forward
+      // keeps up (wallDt ≤ 0.1 s → at most speed·0.1/dt steps are ever owed),
+      // while still protecting against a runaway frame.
       let stepsThisFrame = 0;
-      const maxSteps = 20; // prevent freeze on slow frames
+      const maxSteps = Math.max(20, Math.ceil((0.1 * this.state.speed) / this.state.dt) + 1);
       while (this.accumulator >= this.state.dt && stepsThisFrame < maxSteps) {
         this.doStep(this.state.dt);
         this.accumulator -= this.state.dt;
         stepsThisFrame++;
+        // A callback (e.g. "projectile landed") may have paused/finished us.
+        if (this.state.status !== 'running') break;
       }
+
+      // If we hit the cap, drop the backlog instead of letting it grow forever.
+      if (stepsThisFrame >= maxSteps) this.accumulator = 0;
 
       if (stepsThisFrame > 0) {
         this.notify();
       }
 
-      this.animFrameId = requestAnimationFrame(loop);
+      if (this.state.status === 'running') {
+        this.animFrameId = requestAnimationFrame(loop);
+      }
     };
 
     this.animFrameId = requestAnimationFrame(loop);

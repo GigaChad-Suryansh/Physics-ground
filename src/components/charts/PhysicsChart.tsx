@@ -8,7 +8,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
+  ReferenceLine,
 } from 'recharts';
 
 export interface DataPoint {
@@ -21,93 +21,176 @@ export interface ChartSeries {
   name: string;
   color: string;
   unit?: string;
+  /** Draw this series dashed (e.g. a theoretical reference). */
+  dashed?: boolean;
+  /** Plot against a second y-axis on the right (for quantities of very different size). */
+  axis?: 'left' | 'right';
 }
 
 interface PhysicsChartProps {
   data: DataPoint[];
   series: ChartSeries[];
   title?: string;
+  /** Which field of each data point is plotted on the x-axis. Defaults to "time". */
+  xKey?: string;
   xLabel?: string;
   yLabel?: string;
   exportFilename?: string;
+  /** Max points handed to Recharts (older data is thinned, newest is always kept). */
   maxPoints?: number;
+  height?: number;
+  emptyMessage?: string;
+  /** Draw a horizontal guide at this y value (e.g. 0, or the initial energy). */
+  referenceY?: number;
+}
+
+const compact = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumSignificantDigits: 3,
+});
+
+/** Tick text that stays short for both tiny and huge values. */
+function formatTick(value: unknown): string {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '';
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 1000) return compact.format(n);
+  if (abs >= 100) return n.toFixed(0);
+  if (abs >= 10) return n.toFixed(1);
+  if (abs >= 0.01) return n.toFixed(2);
+  return n.toExponential(0);
 }
 
 export const PhysicsChart: React.FC<PhysicsChartProps> = ({
   data,
   series,
   title = 'Live Measurements',
+  xKey = 'time',
   xLabel = 'Time (s)',
-  yLabel = 'Value',
+  yLabel,
   exportFilename = 'physics-measurements.csv',
-  maxPoints = 200,
+  maxPoints = 300,
+  height = 224,
+  emptyMessage = 'Press Start to record measurements…',
+  referenceY,
 }) => {
-  // Downsample data if too long for smooth graphing
+  // Thin out long runs, anchored at the newest sample so the curve's tail
+  // does not shimmer as new data arrives.
   const displayData = React.useMemo(() => {
     if (data.length <= maxPoints) return data;
     const step = Math.ceil(data.length / maxPoints);
-    return data.filter((_, idx) => idx % step === 0 || idx === data.length - 1);
+    const out: DataPoint[] = [];
+    for (let i = data.length - 1; i >= 0; i -= step) out.push(data[i]);
+    return out.reverse();
   }, [data, maxPoints]);
 
   const handleExportCSV = () => {
     if (data.length === 0) return;
-    const headers = ['Time (s)', ...series.map((s) => `${s.name} (${s.unit || ''})`)];
+    const headers = [xLabel, ...series.map((s) => (s.unit ? `${s.name} (${s.unit})` : s.name))];
     const rows = data.map((d) => [
-      d.time.toFixed(4),
-      ...series.map((s) => (d[s.key] !== undefined ? d[s.key].toFixed(4) : '')),
+      Number(d[xKey]).toFixed(5),
+      ...series.map((s) => (d[s.key] !== undefined ? Number(d[s.key]).toFixed(5) : '')),
     ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => (String(cell).includes(',') ? `"${cell}"` : cell)).join(','))
+      .join('\n');
 
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-
-    const encodedUri = encodeURI(csvContent);
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', exportFilename);
+    link.href = url;
+    link.download = exportFilename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
+  const xShort = xLabel.replace(/\s*\(.*\)\s*$/, '');
+  const hasRightAxis = series.some((x) => x.axis === 'right');
+  const leftSeries = series.filter((x) => x.axis !== 'right');
+  const rightSeries = series.filter((x) => x.axis === 'right');
+  // Time axes always start at t = 0; other axes fit the data.
+  const xDomain: [number | string, number | string] = [xKey === 'time' ? 0 : 'dataMin', 'dataMax'];
+
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col h-full shadow-lg">
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          {title}
-        </h4>
+    <div className="flex flex-col rounded-xl border border-slate-800/90 bg-slate-900/70 p-4 shadow-lg shadow-black/20">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{title}</h4>
         <button
           onClick={handleExportCSV}
           disabled={data.length === 0}
-          className="flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 disabled:opacity-40 disabled:hover:text-slate-500 font-medium px-2 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 transition-all border border-sky-500/20"
+          className="flex shrink-0 items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 text-xs font-medium text-sky-400 transition-all hover:bg-sky-500/20 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-40"
           title="Export captured data to CSV"
         >
-          <Download className="w-3.5 h-3.5" />
-          <span>Export CSV</span>
+          <Download className="h-3.5 w-3.5" />
+          <span>CSV</span>
         </button>
       </div>
 
-      <div className="w-full h-56 sm:h-64 flex-1">
+      {/* Legend lives in the page flow (not inside the SVG) so it can never collide with the axes. */}
+      <div className="mb-2 flex min-h-[18px] flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400">
+        {series.map((x) => (
+          <span key={x.key} className="inline-flex items-center gap-1.5">
+            <span
+              className="inline-block h-0.5 w-4 rounded"
+              style={{
+                background: x.dashed
+                  ? `repeating-linear-gradient(90deg, ${x.color} 0 4px, transparent 4px 7px)`
+                  : x.color,
+                height: 3,
+              }}
+            />
+            {x.name}
+            {x.unit && <span className="font-mono text-slate-500">[{x.unit}]</span>}
+            {x.axis === 'right' && <span className="text-slate-600">→</span>}
+          </span>
+        ))}
+        {yLabel && <span className="ml-auto font-mono text-slate-500">{yLabel}</span>}
+      </div>
+
+      <div className="w-full" style={{ height }}>
         {data.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-xs text-slate-500 font-mono">
-            Run the simulation to record and visualize measurements...
+          <div className="flex h-full items-center justify-center px-4 text-center font-mono text-xs text-slate-500">
+            {emptyMessage}
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={displayData} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+            <LineChart
+              data={displayData}
+              margin={{ top: 6, right: hasRightAxis ? 0 : 14, left: 0, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis
-                dataKey="time"
+                type="number"
+                dataKey={xKey}
+                domain={xDomain}
                 stroke="#64748b"
                 fontSize={11}
-                tickFormatter={(val) => Number(val).toFixed(1)}
-                label={{ value: xLabel, position: 'insideBottom', offset: -5, fill: '#64748b', fontSize: 10 }}
+                tickCount={6}
+                tickFormatter={formatTick}
+                allowDecimals
               />
               <YAxis
+                yAxisId="left"
                 stroke="#64748b"
                 fontSize={11}
-                tickFormatter={(val) => Number(val).toFixed(1)}
+                width={46}
+                tickFormatter={formatTick}
               />
+              {hasRightAxis && (
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  stroke={rightSeries[0]?.color ?? '#64748b'}
+                  fontSize={11}
+                  width={46}
+                  tickFormatter={formatTick}
+                />
+              )}
+              {referenceY !== undefined && (
+                <ReferenceLine yAxisId="left" y={referenceY} stroke="#475569" strokeDasharray="4 4" />
+              )}
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#0f172a',
@@ -116,17 +199,18 @@ export const PhysicsChart: React.FC<PhysicsChartProps> = ({
                   fontSize: '12px',
                   color: '#e2e8f0',
                 }}
-                formatter={(val: any, name: any) => [Number(val).toFixed(2), name]}
-                labelFormatter={(label) => `Time: ${Number(label).toFixed(2)}s`}
+                formatter={(val, name) => [Number(val).toPrecision(4), name]}
+                labelFormatter={(label) => `${xShort}: ${Number(label).toPrecision(4)}`}
               />
-              <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '6px' }} />
-              {series.map((s) => (
+              {[...leftSeries, ...rightSeries].map((x) => (
                 <Line
-                  key={s.key}
+                  key={x.key}
+                  yAxisId={x.axis === 'right' ? 'right' : 'left'}
                   type="monotone"
-                  dataKey={s.key}
-                  name={s.name}
-                  stroke={s.color}
+                  dataKey={x.key}
+                  name={x.name}
+                  stroke={x.color}
+                  strokeDasharray={x.dashed ? '5 4' : undefined}
                   dot={false}
                   strokeWidth={2}
                   isAnimationActive={false}
@@ -136,6 +220,7 @@ export const PhysicsChart: React.FC<PhysicsChartProps> = ({
           </ResponsiveContainer>
         )}
       </div>
+      <div className="mt-1 text-center font-mono text-[10px] text-slate-500">{xLabel}</div>
     </div>
   );
 };
