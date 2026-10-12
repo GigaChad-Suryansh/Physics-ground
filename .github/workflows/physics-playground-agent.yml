@@ -74,6 +74,8 @@ jobs:
             Only if baseline checks pass and no actionable bugs remain, implement the
             lowest-numbered eligible unfinished concept from roadmap/physics-concepts.json.
             Work on no more than one concept in this run. Persist progress in roadmap/progress.json.
+            Record a concise, truthful task summary in progress.json: what you inspected, what you changed,
+            bug fixes or concept work completed, blockers, and test/build results. Never mark unfinished work complete.
             Run node scripts/validate-roadmap.mjs, npm test, and npm run build after changes.
             Do not commit, push, create branches, or open PRs; the workflow will make a PR.
             Never claim deployment; never add concept 101; never weaken tests.
@@ -83,6 +85,58 @@ jobs:
               "tools": { "core": ["run_shell_command", "read_file", "write_file", "replace"] },
               "telemetry": { "enabled": false }
             }
+
+      - name: Append daily run log
+        if: always()
+        shell: bash
+        env:
+          GEMINI_OUTCOME: ${{ steps.gemini.outcome }}
+          BASELINE_TEST_EXIT: ${{ steps.baseline.outputs.test_exit }}
+          BASELINE_BUILD_EXIT: ${{ steps.baseline.outputs.build_exit }}
+        run: |
+          set -euo pipefail
+          mkdir -p roadmap
+          if [ ! -f roadmap/daily-log.md ]; then
+            cat > roadmap/daily-log.md <<'EOF'
+          # Physics Playground — Daily Agent Log
+
+          Each entry records one GitHub Actions run. Persistent state lives in progress.json; this log is a human-readable audit trail. A failed run is not counted as completed work unless its report and code confirm that.
+          EOF
+            printf '\n' >> roadmap/daily-log.md
+          fi
+          day_number=$(($(grep -c '^## Day ' roadmap/daily-log.md || true) + 1))
+          date_utc=$(date -u '+%Y-%m-%d')
+          {
+            printf '## Day %s — %s\n\n' "$day_number" "$date_utc"
+            printf -- '- **Workflow run:** [#%s](https://github.com/%s/actions/runs/%s)\n' "$GITHUB_RUN_NUMBER" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
+            printf -- '- **Trigger:** %s\n' "$GITHUB_EVENT_NAME"
+            printf -- '- **Gemini status:** %s\n' "$GEMINI_OUTCOME"
+            printf -- '- **Baseline tests exit code:** %s (0 = passed)\n' "$BASELINE_TEST_EXIT"
+            printf -- '- **Baseline build exit code:** %s (0 = passed)\n' "$BASELINE_BUILD_EXIT"
+            printf -- '- **Changes present after Gemini:**\n'
+            changed_files=$(git status --short | sed '/roadmap\/daily-log\.md/d' || true)
+            if [ -n "$changed_files" ]; then
+              printf '%s\n' "$changed_files" | sed 's/^/  - `/; s/$/`/'
+            else
+              printf '  - No uncommitted file changes detected.\n'
+            fi
+            printf '\n'
+            printf -- '- **Saved progress snapshot:**\n'
+            node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          try {
+            const p = JSON.parse(fs.readFileSync('roadmap/progress.json', 'utf8'));
+            const fields = [['Last outcome', p.last_outcome], ['Last run', p.last_run], ['Current task', p.current_task], ['Last completed concept ID', p.last_completed_id], ['Completed concepts', Array.isArray(p.completed_ids) ? p.completed_ids.length : 'unknown'], ['Notes', p.notes]];
+            for (const [label, value] of fields) {
+              if (value !== null && value !== undefined && value !== '') {
+                const rendered = typeof value === 'string' ? value.replace(/\s+/g, ' ') : JSON.stringify(value);
+                console.log(`  - **${label}:** ${rendered}`);
+              }
+            }
+          } catch (error) { console.log('  - Could not read progress.json: ' + error.message); }
+          NODE
+            printf '\n---\n\n'
+          } >> roadmap/daily-log.md
 
       - name: Validate roadmap after run
         if: always()
@@ -99,14 +153,14 @@ jobs:
         run: npm run build
 
       - name: Open or update review pull request
-        if: steps.gemini.outcome == 'success'
+        if: always() && steps.gemini.outcome != 'skipped'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: automation/physics-playground-daily
           delete-branch: true
-          title: "chore: autonomous Physics Playground maintenance"
-          commit-message: "chore: autonomous Physics Playground maintenance"
+          title: "chore: autonomous Physics Playground maintenance and run log"
+          commit-message: "chore: autonomous Physics Playground maintenance and run log"
           body: |
             Automated proposal from the daily Gemini developer workflow.
 

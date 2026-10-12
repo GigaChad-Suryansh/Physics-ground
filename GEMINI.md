@@ -39,5 +39,8 @@ Maintain and improve this existing React/TypeScript/Vite Physics Playground at G
 - Never claim a PR is deployed. The existing deployment workflow deploys only after changes reach the configured branch.
 - If a credential, API quota, permission, or test environment blocks safe progress, stop and report the exact blocker.
 
-## Run report
-Update `roadmap/progress.json` with run date, outcome, bugs fixed/found, concept ID/title or why no concept was selected, test/build outcomes, and next action. If useful, add a concise report under `roadmap/reports/`. Distinguish proposed, merged, and deployed changes.
+## Run report and memory
+- Update `roadmap/progress.json` truthfully with run date, outcome, current task, bugs fixed/found, concept ID/title or why no concept was selected, test/build outcomes, blockers, and next action. Preserve earlier completed IDs and useful known-bug notes.
+- Treat `roadmap/daily-log.md` as the human-readable chronological journal. The workflow appends one numbered Day entry after each run, including failed runs; do not create a second Day entry yourself.
+- Before finishing, update `progress.json` so the workflow-generated journal can capture what you actually inspected, changed, validated, and what remains. If quota or another blocker interrupts you, record that honestly and never claim unfinished work is done.
+- Use previous entries and the saved progress state to avoid repeating completed work. Distinguish proposed, merged, and deployed changes.
