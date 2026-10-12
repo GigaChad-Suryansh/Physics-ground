@@ -1,0 +1,14 @@
+{
+  "roadmap_version": "1.0.0",
+  "last_completed_id": 0,
+  "completed_ids": [],
+  "current_task": null,
+  "last_run": null,
+  "last_outcome": "not_started",
+  "known_bugs": [],
+  "blocked_concepts": [],
+  "consecutive_failures": 0,
+  "latest_pull_request": null,
+  "latest_deployment": null,
+  "notes": "Initialize/update this persistent state only through verified work. Never reset it on a new run."
+}

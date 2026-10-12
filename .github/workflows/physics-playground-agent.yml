@@ -1,0 +1,116 @@
+name: Physics Playground Autonomous Developer
+
+on:
+  schedule:
+    # Daily at 08:00 India Standard Time (02:30 UTC)
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: physics-playground-autonomous-developer
+  cancel-in-progress: false
+
+jobs:
+  autonomous-maintenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Validate roadmap before run
+        run: node scripts/validate-roadmap.mjs
+
+      - name: Record baseline test and build results
+        id: baseline
+        shell: bash
+        run: |
+          set +e
+          npm test > /tmp/physics-baseline-tests.log 2>&1
+          test_exit=$?
+          npm run build > /tmp/physics-baseline-build.log 2>&1
+          build_exit=$?
+          {
+            echo "## Autonomous agent baseline"
+            echo "- Tests exit code: $test_exit"
+            echo "- Build exit code: $build_exit"
+            echo '### Test output'
+            cat /tmp/physics-baseline-tests.log
+            echo '### Build output'
+            cat /tmp/physics-baseline-build.log
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "test_exit=$test_exit" >> "$GITHUB_OUTPUT"
+          echo "build_exit=$build_exit" >> "$GITHUB_OUTPUT"
+
+      - name: Run Gemini CLI developer
+        id: gemini
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          prompt: |
+            You are the repository's autonomous physics-simulation developer.
+            Follow GEMINI.md exactly. Use the supplied baseline exit codes and inspect the repository yourself. Tests exit code: ${{ steps.baseline.outputs.test_exit }}.
+            Build exit code: ${{ steps.baseline.outputs.build_exit }}.
+            BUGS FIRST: fix confirmed existing defects before adding a roadmap concept.
+            Only if baseline checks pass and no actionable bugs remain, implement the
+            lowest-numbered eligible unfinished concept from roadmap/physics-concepts.json.
+            Work on no more than one concept in this run. Persist progress in roadmap/progress.json.
+            Run node scripts/validate-roadmap.mjs, npm test, and npm run build after changes.
+            Do not commit, push, create branches, or open PRs; the workflow will make a PR.
+            Never claim deployment; never add concept 101; never weaken tests.
+          settings: |
+            {
+              "model": { "maxSessionTurns": 25 },
+              "tools": { "core": ["run_shell_command", "read_file", "write_file", "replace"] },
+              "telemetry": { "enabled": false }
+            }
+
+      - name: Validate roadmap after run
+        if: always()
+        run: node scripts/validate-roadmap.mjs
+
+      - name: Run tests after changes
+        if: always()
+        continue-on-error: true
+        run: npm test
+
+      - name: Build after changes
+        if: always()
+        continue-on-error: true
+        run: npm run build
+
+      - name: Open or update review pull request
+        if: steps.gemini.outcome == 'success'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/physics-playground-daily
+          delete-branch: true
+          title: "chore: autonomous Physics Playground maintenance"
+          commit-message: "chore: autonomous Physics Playground maintenance"
+          body: |
+            Automated proposal from the daily Gemini developer workflow.
+
+            - Existing bugs and failing checks must be handled before roadmap features.
+            - The fixed roadmap has exactly 100 concepts.
+            - Please review the diff, test results, and progress state before merging.
+            - This PR is not deployed until merged to the deployment branch.
