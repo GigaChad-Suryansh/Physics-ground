@@ -79,7 +79,7 @@ jobs:
             Never claim deployment; never add concept 101; never weaken tests.
           settings: |
             {
-              "model": { "maxSessionTurns": 25 },
+              "model": { "maxSessionTurns": 8 },
               "tools": { "core": ["run_shell_command", "read_file", "write_file", "replace"] },
               "telemetry": { "enabled": false }
             }
