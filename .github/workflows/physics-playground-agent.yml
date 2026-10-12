@@ -68,8 +68,7 @@ jobs:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
             You are the repository's autonomous physics-simulation developer.
-            Follow GEMINI.md exactly. Read the baseline outputs from the workflow summary
-            and inspect the repository yourself. Tests exit code: ${{ steps.baseline.outputs.test_exit }}.
+            Follow GEMINI.md exactly. Use the supplied baseline exit codes and inspect the repository yourself. Tests exit code: ${{ steps.baseline.outputs.test_exit }}.
             Build exit code: ${{ steps.baseline.outputs.build_exit }}.
             BUGS FIRST: fix confirmed existing defects before adding a roadmap concept.
             Only if baseline checks pass and no actionable bugs remain, implement the
@@ -115,6 +114,3 @@ jobs:
             - The fixed roadmap has exactly 100 concepts.
             - Please review the diff, test results, and progress state before merging.
             - This PR is not deployed until merged to the deployment branch.
-          labels: |
-            automated
-            physics-playground
