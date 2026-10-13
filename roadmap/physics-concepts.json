@@ -9,15 +9,37 @@
       "title": "Position, displacement, and reference frames",
       "category": "Classical Mechanics",
       "difficulty": "introductory",
-      "status": "pending",
-      "simulation_type": "determine-after-repository-audit",
-      "learning_objectives": [],
-      "key_equations": [],
-      "visualization_requirements": [],
-      "controls": [],
-      "validation_cases": [],
+      "status": "completed",
+      "simulation_type": "interactive-canvas",
+      "learning_objectives": [
+        "Understand position as a vector relative to a chosen coordinate origin.",
+        "Calculate vector displacement (Δr = r_f - r_i) independently of the origin.",
+        "Transform positions and displacements between different reference frames (translation and rotation)."
+      ],
+      "key_equations": [
+        "r = (x, y)",
+        "Δr = r_f - r_i = (x_f - x_i, y_f - y_i)",
+        "r_B = R(-θ) * (r_A - O_B)"
+      ],
+      "visualization_requirements": [
+        "2D cartesian coordinate system with grid and axes",
+        "Object moving along a trajectory (circle, linear, oscillation)",
+        "Visual vectors for position r_A, displacement Δr, and reference frame B origin O_B and rotated axes",
+        "Readouts for coordinates in both global and local reference frames"
+      ],
+      "controls": [
+        "Motion trajectory type (Circular, Linear, Oscillation)",
+        "Reference frame B origin X and Y coordinates",
+        "Reference frame B rotation angle",
+        "Simulation Play/Pause/Reset and time slider"
+      ],
+      "validation_cases": [
+        "Displacement is invariant under coordinate translation (origin shift)",
+        "Rotation transformation correctly rotates coordinates by -θ",
+        "Initial and final position difference yields exact displacement vector"
+      ],
       "dependencies": [],
-      "notes": "Complete these fields only after reviewing existing site architecture and content."
+      "notes": "Fully implemented with interactive canvas, coordinate transformation math, readouts, charts, and test coverage."
     },
     {
       "id": 2,
