@@ -43,6 +43,11 @@ import {
   getOrbitInfo,
   circularOrbitSpeed,
 } from '../physics/mechanics/orbital';
+import {
+  transformToFrame,
+  getPositionAtTime,
+  DEFAULT_FRAME_PARAMS,
+} from '../physics/mechanics/position-displacement';
 
 describe('Physics Calculation Verification', () => {
   describe('Module 1: Projectile Motion', () => {
@@ -484,6 +489,48 @@ describe('Physics Calculation Verification', () => {
       const params = { ...DEFAULT_ORBITAL_PARAMS, body2Speed: 90 };
       expect(getOrbitInfo(params).bound).toBe(false);
       expect(run(params, 5).initial.totalEnergy).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Module 7: Position, Displacement & Reference Frames', () => {
+    it('correctly calculates vector displacement independently of coordinate origin', () => {
+      const r_i = { x: 2, y: 3 };
+      const r_f = { x: 5, y: 7 };
+      const shift = { x: 10, y: 10 };
+      const r_i_shifted = { x: r_i.x + shift.x, y: r_i.y + shift.y };
+      const r_f_shifted = { x: r_f.x + shift.x, y: r_f.y + shift.y };
+
+      const delta1 = { x: r_f.x - r_i.x, y: r_f.y - r_i.y };
+      const delta2 = { x: r_f_shifted.x - r_i_shifted.x, y: r_f_shifted.y - r_i_shifted.y };
+
+      expect(delta2.x).toBe(delta1.x);
+      expect(delta2.y).toBe(delta1.y);
+      expect(delta1.x).toBe(3);
+      expect(delta1.y).toBe(4);
+    });
+
+    it('transforms coordinates correctly under frame translation and rotation', () => {
+      const frame = { originB: { x: 2, y: 2 }, rotationB: 0 };
+      const currentA = { x: 5, y: 6 };
+      const initialA = { x: 2, y: 2 };
+
+      const res = transformToFrame(currentA, initialA, frame);
+      expect(res.positionInB.x).toBe(3);
+      expect(res.positionInB.y).toBe(4);
+      expect(res.displacementInA.x).toBe(3);
+      expect(res.displacementInA.y).toBe(4);
+      expect(res.displacementInB.x).toBe(3);
+      expect(res.displacementInB.y).toBe(4);
+    });
+
+    it('generates expected trajectory coordinates at time t', () => {
+      const posCircle = getPositionAtTime(0, 'circle');
+      expect(posCircle.x).toBe(4);
+      expect(posCircle.y).toBe(0);
+
+      const posLinear = getPositionAtTime(2, 'linear');
+      expect(posLinear.x).toBe(-3);
+      expect(posLinear.y).toBe(-1);
     });
   });
 });
