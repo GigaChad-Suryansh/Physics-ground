@@ -7,7 +7,7 @@ An interactive digital physics laboratory built for real-time scientific experim
 ## 🌟 Highlights
 
 - **Pure In-Browser Numerical Engine**: Decoupled 120 Hz fixed-step simulation engine (`SimulationEngine.ts`) with step-forward, time scaling (0.5x – 5x), pause/play, and state restoration.
-- **Scientific Rigor**: Implements Velocity Verlet symplectic integration for orbital bodies and Euler-Cromer for kinematics, validated against analytical solutions.
+- **Scientific Rigor**: Uses RK4 for projectile motion, Velocity Verlet symplectic integration for orbital bodies, and closed-form solutions for waves and optics, all validated against analytical results.
 - **Live Scientific Telemetry**: Real-time plotting using Recharts with multi-series kinematic traces, energy conservation graphs, and **CSV export**.
 - **Formatted KaTeX Notation**: Clear, formatted mathematical equations on every module alongside live benchmarks.
 - **Sleek Cyber-Lab Aesthetic**: Deep navy/charcoal theme (`#030712`), subtle coordinate grids, electric-blue/violet accents, accessible controls, and vector overlays.

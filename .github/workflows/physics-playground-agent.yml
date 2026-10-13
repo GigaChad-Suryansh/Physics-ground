@@ -58,39 +58,106 @@ jobs:
           echo "test_exit=$test_exit" >> "$GITHUB_OUTPUT"
           echo "build_exit=$build_exit" >> "$GITHUB_OUTPUT"
 
+      # Checks the API key and finds a model that really has free quota *before*
+      # the agent starts, so a quota/key problem fails fast with a clear message.
+      - name: Select a working Gemini model
+        id: pick
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+        run: node scripts/pick-gemini-model.mjs
+
+      # Deterministic work (which concept is next, which files exist, what the
+      # baseline says) is done here, so the agent spends its few turns building.
+      - name: Prepare agent brief
+        id: brief
+        env:
+          TEST_EXIT: ${{ steps.baseline.outputs.test_exit }}
+          BUILD_EXIT: ${{ steps.baseline.outputs.build_exit }}
+        run: node scripts/agent-brief.mjs
+
       - name: Run Gemini CLI developer
         id: gemini
+        if: steps.pick.outcome == 'success'
         uses: google-github-actions/run-gemini-cli@v0
         env:
           GEMINI_CLI_TRUST_WORKSPACE: "true"
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ steps.pick.outputs.model }}
+          upload_artifacts: true
           prompt: |
-            You are the repository's autonomous physics-simulation developer.
-            Follow GEMINI.md exactly. Use the supplied baseline exit codes and inspect the repository yourself. Tests exit code: ${{ steps.baseline.outputs.test_exit }}.
-            Build exit code: ${{ steps.baseline.outputs.build_exit }}.
-            BUGS FIRST: fix confirmed existing defects before adding a roadmap concept.
-            Only if baseline checks pass and no actionable bugs remain, implement the
-            lowest-numbered eligible unfinished concept from roadmap/physics-concepts.json.
-            Work on no more than one concept in this run. Persist progress in roadmap/progress.json.
-            Record a concise, truthful task summary in progress.json: what you inspected, what you changed,
-            bug fixes or concept work completed, blockers, and test/build results. Never mark unfinished work complete.
-            Run node scripts/validate-roadmap.mjs, npm test, and npm run build after changes.
-            Do not commit, push, create branches, or open PRs; the workflow will make a PR.
-            Never claim deployment; never add concept 101; never weaken tests.
+            You are the repository's autonomous physics-simulation developer. Follow GEMINI.md and the brief below exactly.
+            Never claim deployment; never add concept 101; never weaken tests. Do not commit, push, create branches, or open PRs; the workflow makes the PR.
+
+            ${{ steps.brief.outputs.prompt }}
           settings: |
             {
-              "model": { "maxSessionTurns": 8 },
-              "tools": { "core": ["run_shell_command", "read_file", "write_file", "replace"] },
+              "model": { "maxSessionTurns": 30 },
+              "tools": {
+                "core": ["run_shell_command", "read_file", "write_file", "replace"],
+                "allowed": [
+                  "read_file", "write_file", "replace",
+                  "run_shell_command(npm)", "run_shell_command(node)",
+                  "run_shell_command(ls)", "run_shell_command(cat)", "run_shell_command(head)",
+                  "run_shell_command(tail)", "run_shell_command(grep)", "run_shell_command(find)",
+                  "run_shell_command(wc)", "run_shell_command(git status)", "run_shell_command(git diff)"
+                ]
+              },
               "telemetry": { "enabled": false }
             }
+
+      # Free-tier quota is per model. If the first attempt failed, try the
+      # next working model once (it continues from whatever is on disk).
+      - name: Retry Gemini CLI developer with fallback model
+        id: gemini_retry
+        if: always() && steps.gemini.outcome == 'failure' && steps.pick.outputs.fallback_model != ''
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ steps.pick.outputs.fallback_model }}
+          upload_artifacts: true
+          prompt: |
+            You are the repository's autonomous physics-simulation developer. Follow GEMINI.md and the brief below exactly.
+            Never claim deployment; never add concept 101; never weaken tests. Do not commit, push, create branches, or open PRs; the workflow makes the PR.
+            NOTE: an earlier attempt in this run failed part-way. Run `git status --short` first and continue from what is already on disk rather than starting over.
+
+            ${{ steps.brief.outputs.prompt }}
+          settings: |
+            {
+              "model": { "maxSessionTurns": 30 },
+              "tools": {
+                "core": ["run_shell_command", "read_file", "write_file", "replace"],
+                "allowed": [
+                  "read_file", "write_file", "replace",
+                  "run_shell_command(npm)", "run_shell_command(node)",
+                  "run_shell_command(ls)", "run_shell_command(cat)", "run_shell_command(head)",
+                  "run_shell_command(tail)", "run_shell_command(grep)", "run_shell_command(find)",
+                  "run_shell_command(wc)", "run_shell_command(git status)", "run_shell_command(git diff)"
+                ]
+              },
+              "telemetry": { "enabled": false }
+            }
+
+      # The agent must not change its own automation. (The default token also
+      # cannot push workflow-file edits, which would make the PR step fail.)
+      - name: Revert any agent changes to protected files
+        if: always()
+        shell: bash
+        run: |
+          git checkout -- .github scripts GEMINI.md 2>/dev/null || true
+          git clean -fdq -- .github scripts 2>/dev/null || true
 
       - name: Append daily run log
         if: always()
         shell: bash
         env:
-          GEMINI_OUTCOME: ${{ steps.gemini.outcome }}
+          GEMINI_OUTCOME: ${{ steps.gemini_retry.outcome == 'success' && 'success (fallback model)' || (steps.pick.outcome != 'success' && 'skipped (no working model - see pre-flight summary)') || steps.gemini.outcome }}
+          GEMINI_MODEL_USED: ${{ steps.gemini_retry.outcome == 'success' && steps.pick.outputs.fallback_model || steps.pick.outputs.model }}
           BASELINE_TEST_EXIT: ${{ steps.baseline.outputs.test_exit }}
           BASELINE_BUILD_EXIT: ${{ steps.baseline.outputs.build_exit }}
         run: |
@@ -111,6 +178,7 @@ jobs:
             printf -- '- **Workflow run:** [#%s](https://github.com/%s/actions/runs/%s)\n' "$GITHUB_RUN_NUMBER" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
             printf -- '- **Trigger:** %s\n' "$GITHUB_EVENT_NAME"
             printf -- '- **Gemini status:** %s\n' "$GEMINI_OUTCOME"
+            printf -- '- **Gemini model:** %s\n' "${GEMINI_MODEL_USED:-none}"
             printf -- '- **Baseline tests exit code:** %s (0 = passed)\n' "$BASELINE_TEST_EXIT"
             printf -- '- **Baseline build exit code:** %s (0 = passed)\n' "$BASELINE_BUILD_EXIT"
             printf -- '- **Changes present after Gemini:**\n'
@@ -153,10 +221,14 @@ jobs:
         run: npm run build
 
       - name: Open or update review pull request
-        if: always() && steps.gemini.outcome != 'skipped'
+        id: pr
+        if: always()
+        continue-on-error: true
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: add a fine-grained PAT as secret PR_TOKEN (Pull requests: write,
+          # Contents: write) to avoid enabling the repository setting described below.
+          token: ${{ secrets.PR_TOKEN || secrets.GITHUB_TOKEN }}
           branch: automation/physics-playground-daily
           delete-branch: true
           title: "chore: autonomous Physics Playground maintenance and run log"
@@ -168,3 +240,19 @@ jobs:
             - The fixed roadmap has exactly 100 concepts.
             - Please review the diff, test results, and progress state before merging.
             - This PR is not deployed until merged to the deployment branch.
+
+      - name: Explain pull request failure
+        if: always() && steps.pr.outcome == 'failure'
+        shell: bash
+        run: |
+          {
+            echo "## Pull request could not be created"
+            echo
+            echo "The agent's work **was pushed** to the branch \`automation/physics-playground-daily\`, but GitHub refused to open the PR."
+            echo
+            echo "**Fix (one time):** repository **Settings → Actions → General → Workflow permissions** → tick **Allow GitHub Actions to create and approve pull requests** → **Save**."
+            echo
+            echo "Until then you can open the PR by hand: https://github.com/${GITHUB_REPOSITORY}/compare/main...automation/physics-playground-daily?expand=1"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error title=Enable PR creation::Settings > Actions > General > Workflow permissions > tick 'Allow GitHub Actions to create and approve pull requests'. The branch automation/physics-playground-daily already has the changes."
+          exit 1
