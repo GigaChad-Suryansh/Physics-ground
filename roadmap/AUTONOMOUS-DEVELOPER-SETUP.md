@@ -51,3 +51,13 @@ The workflow is scheduled daily at 08:00 India Standard Time. It proposes change
 
 ## Important
 The starter's initial roadmap records the 100 planned concepts, but it does not certify that all existing simulations are bug-free. The first run must audit the actual code and existing tests before implementing any new concept.
+
+## How a run is verified (never trust the agent)
+
+The workflow does not take Gemini's word that it succeeded. After the agent runs:
+
+1. `scripts/verify.mjs` runs roadmap validation, `npm run build` (tsc + vite) and `npm test` itself, and rejects any "concept completed" claim that has no new page, physics module and route.
+2. If that fails, Gemini gets **one** repair pass with the real compiler/test errors.
+3. If the final verification still fails, `scripts/discard-agent-work.mjs` throws the changes away, records the failure in `roadmap/progress.json` (3 failures on one concept blocks it), and only the daily log is committed. Broken code is never put in a pull request.
+
+If Gemini itself keeps failing, open `roadmap/daily-log.md` on the `automation/physics-playground-daily` branch: it records Gemini's actual error text.

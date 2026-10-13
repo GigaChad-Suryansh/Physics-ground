@@ -46,6 +46,68 @@ const simulations = list('src/simulations', (n) => n.endsWith('.tsx'));
 const physics = list('src/physics', (n) => n.endsWith('.ts'));
 const tests = list('src/tests', (n) => n.endsWith('.ts'));
 
+/**
+ * Real prop/type signatures of the shared building blocks, extracted from the
+ * source so the brief can never drift from the code. (The agent previously
+ * guessed prop names like `isPlaying` / `onStepForward` and broke the build.)
+ */
+function extractApi(file) {
+  let text;
+  try {
+    text = fs.readFileSync(file, 'utf8');
+  } catch {
+    return '';
+  }
+  const lines = text.split('\n');
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (/^(export\s+)?(interface|type)\s+\w+/.test(l)) {
+      const block = [l];
+      if (!/;\s*$/.test(l) || /\{\s*$/.test(l)) {
+        while (i + 1 < lines.length && !/^[}\]]/.test(lines[i + 1]) && block.length < 60) block.push(lines[++i]);
+        if (i + 1 < lines.length) block.push(lines[++i]);
+      }
+      out.push(block.filter((x) => x.trim() !== '').join('\n'));
+    } else if (/^export\s+(async\s+)?function\s+\w+/.test(l) || /^export\s+const\s+\w+\s*[:=]/.test(l)) {
+      // Signature only: join lines until <> () {} are balanced, then cut at " = " / body.
+      let sig = l;
+      let j = i;
+      const depth = (t) => {
+        const u = t.replace(/=>/g, '->');
+        const c = (re) => (u.match(re) || []).length;
+        return c(/</g) - c(/>/g) + c(/\(/g) - c(/\)/g) + c(/\{/g) - c(/\}/g);
+      };
+      while (depth(sig) > 0 && j + 1 < lines.length && j - i < 8) sig += ' ' + lines[++j].trim();
+      sig = sig.replace(/\s+/g, ' ');
+      if (/^export\s+const/.test(sig)) sig = sig.replace(/\s=\s.*$/, '');
+      else sig = sig.replace(/\)\s*(:\s*[^{]+)?\{.*$/, (m, ret) => ')' + (ret ? ret.trimEnd() : ''));
+      out.push(sig.trim());
+    }
+  }
+  return out.join('\n');
+}
+
+const API_FILES = [
+  'src/components/layout/LabLayout.tsx',
+  'src/components/controls/SimulationControls.tsx',
+  'src/components/ui/Panel.tsx',
+  'src/components/ui/Slider.tsx',
+  'src/components/ui/theme.ts',
+  'src/components/charts/PhysicsChart.tsx',
+  'src/components/canvas/SimCanvas.tsx',
+  'src/components/canvas/draw.ts',
+  'src/hooks/useSimulation.ts',
+  'src/hooks/useTelemetry.ts',
+];
+const apiSheet = API_FILES.map((f) => `// ${f}\n${extractApi(f)}`).join('\n\n');
+
+const lastFailure = progress.last_failure;
+const failureNote =
+  lastFailure && (!next || lastFailure.concept_id === next.id)
+    ? `\n## A previous attempt at this task FAILED verification\nThe workflow discarded it. The errors were:\n\n${lastFailure.note}\n\nAvoid the same mistake: use ONLY the exact prop names in the API reference below.\n`
+    : '';
+
 const knownBugs = (progress.known_bugs || []).map((b) => `- ${typeof b === 'string' ? b : JSON.stringify(b)}`);
 
 const parts = [];
@@ -89,14 +151,20 @@ Fill in the empty fields of the concept (learning_objectives, key_equations, vis
 `);
 }
 
-parts.push(`## Existing files (for reference — do not list directories again)
+parts.push(`${failureNote}
+## Shared component API reference (EXACT signatures — the TypeScript check is strict; do not invent props)
+\`\`\`ts
+${apiSheet}
+\`\`\`
+
+## Existing files (for reference — do not list directories again)
 - Simulation pages: ${simulations.join(', ') || '(none)'}
 - Physics modules: ${physics.join(', ') || '(none)'}
 - Tests: ${tests.join(', ') || '(none)'}
 
 ## Before you finish (3 calls)
-1. \`node scripts/validate-roadmap.mjs && npm test 2>&1 | tail -25 && npm run build 2>&1 | tail -15\`
-2. Update \`roadmap/progress.json\`: last_run (ISO date), last_outcome, current_task, bugs found/fixed, concept ID/title worked on, test/build results, blockers, next action. Add the concept ID to completed_ids AND set its status to "completed" in roadmap/physics-concepts.json ONLY if it is integrated, tested, and the build passes. Otherwise set status "in_progress" and describe what remains.
+1. FIRST \`npx tsc --noEmit 2>&1 | head -40\` and fix every error (repeat until clean), THEN \`node scripts/validate-roadmap.mjs && npm test 2>&1 | tail -25 && npm run build 2>&1 | tail -15\`. The workflow re-runs these itself and discards work that does not pass, so unverified work is wasted.
+2. Only AFTER step 1 is green, update \`roadmap/progress.json\` (never before; never claim success you have not seen): last_run (ISO date), last_outcome, current_task, bugs found/fixed, concept ID/title worked on, test/build results, blockers, next action. Add the concept ID to completed_ids AND set its status to "completed" in roadmap/physics-concepts.json ONLY if it is integrated, tested, and the build passes. Otherwise set status "in_progress" and describe what remains.
 3. Do not touch .github/, scripts/, or GEMINI.md (the workflow reverts changes there). Do not commit or push.
 `);
 
@@ -104,6 +172,7 @@ const prompt = parts.join('\n');
 console.log(prompt);
 
 if (process.env.GITHUB_OUTPUT) {
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `concept_id=${next ? next.id : ''}\n`);
   const delim = `BRIEF_${Math.random().toString(36).slice(2)}`;
   fs.appendFileSync(process.env.GITHUB_OUTPUT, `prompt<<${delim}\n${prompt}\n${delim}\n`);
 }

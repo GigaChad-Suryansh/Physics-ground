@@ -1,19 +1,12 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Sliders, Compass, Info, RotateCw, Navigation } from 'lucide-react';
+import { Sliders, Compass, Info } from 'lucide-react';
 import { LabLayout } from '../../components/layout/LabLayout';
 import { SimulationControls } from '../../components/controls/SimulationControls';
 import { PhysicsChart } from '../../components/charts/PhysicsChart';
 import { SimCanvas } from '../../components/canvas/SimCanvas';
 import type { DrawFn } from '../../components/canvas/SimCanvas';
-import {
-  MONO,
-  drawArrow,
-  drawTag,
-  fillGradient,
-  niceTicks,
-  formatTickValue,
-} from '../../components/canvas/draw';
-import { Badge, FormulaList, Panel, ReadoutBar } from '../../components/ui/Panel';
+import { MONO, drawArrow, drawTag, fillGradient, glowDot, niceTicks } from '../../components/canvas/draw';
+import { FormulaList, Panel, ReadoutBar } from '../../components/ui/Panel';
 import { Slider } from '../../components/ui/Slider';
 import { CANVAS_COLORS } from '../../components/ui/theme';
 import { useSimulation } from '../../hooks/useSimulation';
@@ -24,10 +17,13 @@ import {
   transformToFrame,
   type ReferenceFrameParams,
 } from '../../physics/mechanics/position-displacement';
-import { DEG_TO_RAD, RAD_TO_DEG } from '../../physics/constants';
+import { DEG_TO_RAD } from '../../physics/constants';
 
 const CANVAS_HEIGHT = 440;
 const PX_PER_M = 30; // Scale: 30 pixels per meter
+const DT = 1 / 60;
+/** Seconds of motion before each path ends (keeps the object on screen). */
+const DURATION: Record<'circle' | 'linear' | 'oscillation', number> = { circle: 4 * Math.PI, linear: 14, oscillation: 4 * Math.PI };
 
 type TrajType = 'circle' | 'linear' | 'oscillation';
 
@@ -47,25 +43,29 @@ export const PositionDisplacementPage: React.FC = () => {
 
   const initialA = useMemo(() => getPositionAtTime(0, trajType), [trajType]);
 
-  const { state: simState, play, pause, reset, step, setSpeed } = useSimulation({
-    dt: 1 / 60,
+  const { state: simState, play, pause, reset, step, setSpeed, finish } = useSimulation({
+    dt: DT,
     onStep: () => {
-      const t = timeRef.current + 1 / 60;
+      const type = trajRef.current;
+      if (timeRef.current >= DURATION[type]) return;
+      const t = Math.min(timeRef.current + DT, DURATION[type]);
       timeRef.current = t;
       setLiveTime(t);
 
-      const currentA = getPositionAtTime(t, trajRef.current);
-      const trans = transformToFrame(currentA, initialA, frameRef.current);
+      const a0 = getPositionAtTime(0, type);
+      const trans = transformToFrame(getPositionAtTime(t, type), a0, frameRef.current);
 
-      telemetry.push({
-        time: t,
-        x_A: trans.positionInA.x,
-        y_A: trans.positionInA.y,
-        x_B: trans.positionInB.x,
-        y_B: trans.positionInB.y,
-        dx_A: trans.displacementInA.x,
-        dy_A: trans.displacementInA.y,
-      });
+      telemetry.push(
+        {
+          time: t,
+          x_A: trans.positionInA.x,
+          y_A: trans.positionInA.y,
+          x_B: trans.positionInB.x,
+          y_B: trans.positionInB.y,
+        },
+        t >= DURATION[type]
+      );
+      if (t >= DURATION[type]) finish();
     },
     onReset: () => {
       timeRef.current = 0;
@@ -74,18 +74,13 @@ export const PositionDisplacementPage: React.FC = () => {
     },
   });
 
-  const updateFrame = useCallback(
-    (patch: Partial<ReferenceFrameParams>) => {
-      setFrameParams((prev) => ({ ...prev, ...patch }));
-    },
-    []
-  );
+  const updateFrame = useCallback((patch: Partial<ReferenceFrameParams>) => {
+    setFrameParams((prev) => ({ ...prev, ...patch }));
+  }, []);
 
   const handleTrajChange = (type: TrajType) => {
+    trajRef.current = type;
     setTrajType(type);
-    timeRef.current = 0;
-    setLiveTime(0);
-    telemetry.clear();
     reset();
   };
 
@@ -93,6 +88,7 @@ export const PositionDisplacementPage: React.FC = () => {
   const transformation = transformToFrame(currentA, initialA, frameParams);
 
   const draw: DrawFn = (ctx, width, height) => {
+    const startA = initialA;
     const originX = width / 2;
     const originY = height / 2;
 
@@ -144,7 +140,7 @@ export const PositionDisplacementPage: React.FC = () => {
     ctx.lineWidth = 2;
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
-    for (let t = 0; t <= Math.max(liveTime, 0.05); t += 0.05) {
+    for (let t = 0; t <= Math.max(liveTime, 0.05) + 1e-9; t += 0.05) {
       const pt = getPositionAtTime(t, trajType);
       const sx = originX + pt.x * PX_PER_M;
       const sy = originY - pt.y * PX_PER_M;
@@ -182,8 +178,8 @@ export const PositionDisplacementPage: React.FC = () => {
 
     // Initial Position in A & Current Position in A
     const initScreen = {
-      x: originX + initialA.x * PX_PER_M,
-      y: originY - initialA.y * PX_PER_M,
+      x: originX + startA.x * PX_PER_M,
+      y: originY - startA.y * PX_PER_M,
     };
     const currScreen = {
       x: originX + currentA.x * PX_PER_M,
@@ -203,19 +199,12 @@ export const PositionDisplacementPage: React.FC = () => {
     ctx.fill();
     drawTag(ctx, 'Initial (r_0)', initScreen.x + 8, initScreen.y + 12);
 
-    ctx.fillStyle = '#38bdf8';
-    ctx.beginPath();
-    ctx.arc(currScreen.x, currScreen.y, 7, 0, Math.PI * 2);
-    ctx.fill();
+    glowDot(ctx, currScreen.x, currScreen.y, 7, '#38bdf8', 10);
     drawTag(ctx, 'Object (r)', currScreen.x + 10, currScreen.y - 10, { color: '#38bdf8', bg: 'rgba(56,189,248,0.2)' });
   };
 
   return (
-    <LabLayout
-      title="Position, Displacement, and Reference Frames"
-      category="Classical Mechanics"
-      description="Explore position vectors, displacement independent of origin, and coordinate transformations between reference frames."
-    >
+    <LabLayout title="Position, Displacement & Reference Frames" category="Mechanics & Kinematics">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Simulation Panel */}
         <div className="lg:col-span-8 space-y-6">
@@ -243,13 +232,14 @@ export const PositionDisplacementPage: React.FC = () => {
 
             <div className="mt-4">
               <SimulationControls
-                isPlaying={simState.isPlaying}
-                speed={simState.speed}
-                time={liveTime}
-                onPlay={play}
+                state={simState}
+                onPlay={() => {
+                  if (simState.status === 'finished') reset();
+                  play();
+                }}
                 onPause={pause}
                 onReset={reset}
-                onStepForward={step}
+                onStep={step}
                 onSpeedChange={setSpeed}
               />
             </div>
@@ -258,25 +248,27 @@ export const PositionDisplacementPage: React.FC = () => {
           {/* Readouts */}
           <ReadoutBar
             items={[
-              { label: 'Time', value: liveTime.toFixed(2), unit: 's' },
-              { label: 'Position (A)', value: `(${transformation.positionInA.x.toFixed(2)}, ${transformation.positionInA.y.toFixed(2)})`, unit: 'm' },
-              { label: 'Displacement (A)', value: `(${transformation.displacementInA.x.toFixed(2)}, ${transformation.displacementInA.y.toFixed(2)})`, unit: 'm' },
-              { label: 'Position (B)', value: `(${transformation.positionInB.x.toFixed(2)}, ${transformation.positionInB.y.toFixed(2)})`, unit: 'm' },
-              { label: 'Displacement (B)', value: `(${transformation.displacementInB.x.toFixed(2)}, ${transformation.displacementInB.y.toFixed(2)})`, unit: 'm' },
+              { label: 'Time', value: `${liveTime.toFixed(2)} s` },
+              { label: 'Position (A)', value: `(${transformation.positionInA.x.toFixed(2)}, ${transformation.positionInA.y.toFixed(2)}) m` },
+              { label: 'Displacement (A)', value: `(${transformation.displacementInA.x.toFixed(2)}, ${transformation.displacementInA.y.toFixed(2)}) m` },
+              { label: 'Position (B)', value: `(${transformation.positionInB.x.toFixed(2)}, ${transformation.positionInB.y.toFixed(2)}) m` },
+              { label: 'Displacement (B)', value: `(${transformation.displacementInB.x.toFixed(2)}, ${transformation.displacementInB.y.toFixed(2)}) m` },
             ]}
           />
 
           {/* Telemetry Chart */}
           <PhysicsChart
             data={telemetry.data}
-            timeKey="time"
-            lines={[
-              { key: 'x_A', name: 'Global X (m)', color: '#38bdf8' },
-              { key: 'y_A', name: 'Global Y (m)', color: '#10b981' },
-              { key: 'x_B', name: 'Local X' , color: '#f43f5e' },
-              { key: 'y_B', name: 'Local Y', color: '#fbbf24' },
+            title="Position components in each frame"
+            xLabel="Time (s)"
+            series={[
+              { key: 'x_A', name: 'x in A', color: '#38bdf8', unit: 'm' },
+              { key: 'y_A', name: 'y in A', color: '#10b981', unit: 'm' },
+              { key: 'x_B', name: 'x in B', color: '#f43f5e', unit: 'm' },
+              { key: 'y_B', name: 'y in B', color: '#fbbf24', unit: 'm' },
             ]}
-            height={220}
+            referenceY={0}
+            exportFilename="position-frames.csv"
           />
         </div>
 
@@ -317,9 +309,9 @@ export const PositionDisplacementPage: React.FC = () => {
           <Panel title="Core Physics Concepts" icon={Info}>
             <FormulaList
               formulas={[
-                { name: 'Position Vector', latex: '\\vec{r} = x\\hat{i} + y\\hat{j}' },
-                { name: 'Displacement', latex: '\\Delta\\vec{r} = \\vec{r}_f - \\vec{r}_i' },
-                { name: 'Frame Transformation', latex: '\\vec{r}_B = R(-\\theta)(\\vec{r}_A - \\vec{O}_B)' },
+                '\\vec{r} = x\\hat{i} + y\\hat{j}',
+                '\\Delta\\vec{r} = \\vec{r}_f - \\vec{r}_i',
+                '\\vec{r}_B = R(-\\theta)(\\vec{r}_A - \\vec{O}_B)',
               ]}
             />
             <div className="mt-4 text-xs text-slate-400 space-y-2">
