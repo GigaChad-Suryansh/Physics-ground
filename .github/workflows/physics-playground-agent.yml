@@ -264,7 +264,7 @@ jobs:
               printf -- '- **Agent work discarded (did not build/pass tests):** %s\n' "$DISCARDED_FILES"
             fi
             if [ -n "${GEMINI_ERROR:-}" ]; then
-              printf -- '- **Gemini error output:** %s\n' "$(printf '%s' "$GEMINI_ERROR" | tr '\n' ' ' | cut -c1-1200)"
+              printf -- '- **Gemini error output:** %s\n' "$(printf '%s' "$GEMINI_ERROR" | tr '\n' ' ' | tail -c 1800)"
             fi
             if [ -n "${GEMINI_SUMMARY:-}" ]; then
               printf -- '- **Gemini summary:** %s\n' "$(printf '%s' "$GEMINI_SUMMARY" | tr '\n' ' ' | cut -c1-800)"
