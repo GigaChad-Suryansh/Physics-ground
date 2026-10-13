@@ -14,6 +14,17 @@ import {
 
 export const SIMULATION_MODULES = [
   {
+    id: 'position-displacement',
+    name: 'Position & Reference Frames',
+    category: 'Classical Mechanics',
+    path: '/sim/position-displacement',
+    icon: Compass,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: 'Position vectors, coordinate transformations, and frame-independent displacement.',
+    badge: 'Introductory',
+  },
+  {
     id: 'projectile',
     name: 'Projectile Motion',
     category: 'Mechanics',
