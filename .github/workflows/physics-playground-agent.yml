@@ -87,6 +87,7 @@ jobs:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ steps.pick.outputs.model }}
           upload_artifacts: true
+          gemini_debug: true
           prompt: |
             You are the repository's autonomous physics-simulation developer. Follow GEMINI.md and the brief below exactly.
             Never claim deployment; never add concept 101; never weaken tests. Do not commit, push, create branches, or open PRs; the workflow makes the PR.
@@ -99,7 +100,7 @@ jobs:
                 "core": ["run_shell_command", "read_file", "write_file", "replace"],
                 "allowed": [
                   "read_file", "write_file", "replace",
-                  "run_shell_command(npm)", "run_shell_command(node)",
+                  "run_shell_command(npm)", "run_shell_command(node)", "run_shell_command(npx)",
                   "run_shell_command(ls)", "run_shell_command(cat)", "run_shell_command(head)",
                   "run_shell_command(tail)", "run_shell_command(grep)", "run_shell_command(find)",
                   "run_shell_command(wc)", "run_shell_command(git status)", "run_shell_command(git diff)"
@@ -121,6 +122,7 @@ jobs:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ steps.pick.outputs.fallback_model }}
           upload_artifacts: true
+          gemini_debug: true
           prompt: |
             You are the repository's autonomous physics-simulation developer. Follow GEMINI.md and the brief below exactly.
             Never claim deployment; never add concept 101; never weaken tests. Do not commit, push, create branches, or open PRs; the workflow makes the PR.
@@ -134,7 +136,7 @@ jobs:
                 "core": ["run_shell_command", "read_file", "write_file", "replace"],
                 "allowed": [
                   "read_file", "write_file", "replace",
-                  "run_shell_command(npm)", "run_shell_command(node)",
+                  "run_shell_command(npm)", "run_shell_command(node)", "run_shell_command(npx)",
                   "run_shell_command(ls)", "run_shell_command(cat)", "run_shell_command(head)",
                   "run_shell_command(tail)", "run_shell_command(grep)", "run_shell_command(find)",
                   "run_shell_command(wc)", "run_shell_command(git status)", "run_shell_command(git diff)"
@@ -152,6 +154,76 @@ jobs:
           git checkout -- .github scripts GEMINI.md 2>/dev/null || true
           git clean -fdq -- .github scripts 2>/dev/null || true
 
+      # The agent's own report is never trusted: run the real build and tests.
+      - name: Verify agent output
+        id: verify1
+        if: always()
+        env:
+          VERIFY_LABEL: after agent
+        run: node scripts/verify.mjs
+
+      # One repair attempt, fed the real compiler/test errors.
+      - name: Repair failed checks with Gemini
+        id: repair
+        if: always() && steps.verify1.outputs.ok == 'false' && steps.verify1.outputs.changed == 'true' && steps.pick.outcome == 'success'
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ steps.pick.outputs.fallback_model || steps.pick.outputs.model }}
+          upload_artifacts: true
+          gemini_debug: true
+          prompt: |
+            You are the repository's autonomous physics-simulation developer. Follow GEMINI.md.
+            The work currently in the working tree FAILS the build/tests. Fix ONLY these errors; do not add features, do not delete or weaken tests.
+            Use the exact component prop names from the API reference in the brief below. After editing, run `npx tsc --noEmit` and `npm test` until both pass.
+            Do not commit, push, or touch .github/, scripts/, or GEMINI.md.
+
+            ## Errors to fix
+            ${{ steps.verify1.outputs.errors }}
+
+            ${{ steps.brief.outputs.prompt }}
+          settings: |
+            {
+              "model": { "maxSessionTurns": 30 },
+              "tools": {
+                "core": ["run_shell_command", "read_file", "write_file", "replace"],
+                "allowed": [
+                  "read_file", "write_file", "replace",
+                  "run_shell_command(npm)", "run_shell_command(node)", "run_shell_command(npx)",
+                  "run_shell_command(ls)", "run_shell_command(cat)", "run_shell_command(head)",
+                  "run_shell_command(tail)", "run_shell_command(grep)", "run_shell_command(find)",
+                  "run_shell_command(wc)", "run_shell_command(git status)", "run_shell_command(git diff)"
+                ]
+              },
+              "telemetry": { "enabled": false }
+            }
+
+      - name: Revert protected files again
+        if: always()
+        shell: bash
+        run: |
+          git checkout -- .github scripts GEMINI.md 2>/dev/null || true
+          git clean -fdq -- .github scripts 2>/dev/null || true
+
+      - name: Final verification
+        id: verify
+        if: always()
+        env:
+          VERIFY_LABEL: final
+        run: node scripts/verify.mjs
+
+      # Never ship work that does not build: drop it and record the failure.
+      - name: Discard unverified agent work
+        id: discard
+        if: always() && steps.verify.outputs.ok == 'false' && steps.verify.outputs.changed == 'true'
+        env:
+          CONCEPT_ID: ${{ steps.brief.outputs.concept_id }}
+          FAIL_NOTE: ${{ steps.verify.outputs.errors }}
+        run: node scripts/discard-agent-work.mjs
+
       - name: Append daily run log
         if: always()
         shell: bash
@@ -160,6 +232,11 @@ jobs:
           GEMINI_MODEL_USED: ${{ steps.gemini_retry.outcome == 'success' && steps.pick.outputs.fallback_model || steps.pick.outputs.model }}
           BASELINE_TEST_EXIT: ${{ steps.baseline.outputs.test_exit }}
           BASELINE_BUILD_EXIT: ${{ steps.baseline.outputs.build_exit }}
+          VERIFY_OK: ${{ steps.verify.outputs.ok }}
+          REPAIR_OUTCOME: ${{ steps.repair.outcome }}
+          DISCARDED_FILES: ${{ steps.discard.outputs.discarded_files }}
+          GEMINI_ERROR: ${{ steps.gemini.outputs.error || steps.gemini_retry.outputs.error }}
+          GEMINI_SUMMARY: ${{ steps.gemini.outputs.summary }}
         run: |
           set -euo pipefail
           mkdir -p roadmap
@@ -181,7 +258,18 @@ jobs:
             printf -- '- **Gemini model:** %s\n' "${GEMINI_MODEL_USED:-none}"
             printf -- '- **Baseline tests exit code:** %s (0 = passed)\n' "$BASELINE_TEST_EXIT"
             printf -- '- **Baseline build exit code:** %s (0 = passed)\n' "$BASELINE_BUILD_EXIT"
-            printf -- '- **Changes present after Gemini:**\n'
+            printf -- '- **Independent verification (build + tests):** %s\n' "$([ "$VERIFY_OK" = "true" ] && echo passed || echo FAILED)"
+            printf -- '- **Repair attempt:** %s\n' "${REPAIR_OUTCOME:-skipped}"
+            if [ -n "${DISCARDED_FILES:-}" ]; then
+              printf -- '- **Agent work discarded (did not build/pass tests):** %s\n' "$DISCARDED_FILES"
+            fi
+            if [ -n "${GEMINI_ERROR:-}" ]; then
+              printf -- '- **Gemini error output:** %s\n' "$(printf '%s' "$GEMINI_ERROR" | tr '\n' ' ' | cut -c1-1200)"
+            fi
+            if [ -n "${GEMINI_SUMMARY:-}" ]; then
+              printf -- '- **Gemini summary:** %s\n' "$(printf '%s' "$GEMINI_SUMMARY" | tr '\n' ' ' | cut -c1-800)"
+            fi
+            printf -- '- **Changes present after verification:**\n'
             changed_files=$(git status --short | sed '/roadmap\/daily-log\.md/d' || true)
             if [ -n "$changed_files" ]; then
               printf '%s\n' "$changed_files" | sed 's/^/  - `/; s/$/`/'
@@ -209,16 +297,6 @@ jobs:
       - name: Validate roadmap after run
         if: always()
         run: node scripts/validate-roadmap.mjs
-
-      - name: Run tests after changes
-        if: always()
-        continue-on-error: true
-        run: npm test
-
-      - name: Build after changes
-        if: always()
-        continue-on-error: true
-        run: npm run build
 
       - name: Open or update review pull request
         id: pr
