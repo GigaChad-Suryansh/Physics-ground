@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Sliders, Compass, Info, RotateCw, Navigation } from 'lucide-react';
+import { Sliders, Compass, Info } from 'lucide-react';
 import { LabLayout } from '../../components/layout/LabLayout';
 import { SimulationControls } from '../../components/controls/SimulationControls';
 import { PhysicsChart } from '../../components/charts/PhysicsChart';
@@ -11,9 +11,8 @@ import {
   drawTag,
   fillGradient,
   niceTicks,
-  formatTickValue,
 } from '../../components/canvas/draw';
-import { Badge, FormulaList, Panel, ReadoutBar } from '../../components/ui/Panel';
+import { FormulaList, Panel, ReadoutBar } from '../../components/ui/Panel';
 import { Slider } from '../../components/ui/Slider';
 import { CANVAS_COLORS } from '../../components/ui/theme';
 import { useSimulation } from '../../hooks/useSimulation';
@@ -24,7 +23,7 @@ import {
   transformToFrame,
   type ReferenceFrameParams,
 } from '../../physics/mechanics/position-displacement';
-import { DEG_TO_RAD, RAD_TO_DEG } from '../../physics/constants';
+import { DEG_TO_RAD } from '../../physics/constants';
 
 const CANVAS_HEIGHT = 440;
 const PX_PER_M = 30; // Scale: 30 pixels per meter
@@ -214,7 +213,6 @@ export const PositionDisplacementPage: React.FC = () => {
     <LabLayout
       title="Position, Displacement, and Reference Frames"
       category="Classical Mechanics"
-      description="Explore position vectors, displacement independent of origin, and coordinate transformations between reference frames."
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Simulation Panel */}
@@ -243,13 +241,11 @@ export const PositionDisplacementPage: React.FC = () => {
 
             <div className="mt-4">
               <SimulationControls
-                isPlaying={simState.isPlaying}
-                speed={simState.speed}
-                time={liveTime}
+                state={simState}
                 onPlay={play}
                 onPause={pause}
                 onReset={reset}
-                onStepForward={step}
+                onStep={step}
                 onSpeedChange={setSpeed}
               />
             </div>
@@ -258,23 +254,25 @@ export const PositionDisplacementPage: React.FC = () => {
           {/* Readouts */}
           <ReadoutBar
             items={[
-              { label: 'Time', value: liveTime.toFixed(2), unit: 's' },
-              { label: 'Position (A)', value: `(${transformation.positionInA.x.toFixed(2)}, ${transformation.positionInA.y.toFixed(2)})`, unit: 'm' },
-              { label: 'Displacement (A)', value: `(${transformation.displacementInA.x.toFixed(2)}, ${transformation.displacementInA.y.toFixed(2)})`, unit: 'm' },
-              { label: 'Position (B)', value: `(${transformation.positionInB.x.toFixed(2)}, ${transformation.positionInB.y.toFixed(2)})`, unit: 'm' },
-              { label: 'Displacement (B)', value: `(${transformation.displacementInB.x.toFixed(2)}, ${transformation.displacementInB.y.toFixed(2)})`, unit: 'm' },
+              { label: 'Time', value: `${liveTime.toFixed(2)} s`, accent: 'sky' },
+              { label: 'Position (A)', value: `(${transformation.positionInA.x.toFixed(2)}, ${transformation.positionInA.y.toFixed(2)}) m`, accent: 'sky' },
+              { label: 'Displacement (A)', value: `(${transformation.displacementInA.x.toFixed(2)}, ${transformation.displacementInA.y.toFixed(2)}) m`, accent: 'amber' },
+              { label: 'Position (B)', value: `(${transformation.positionInB.x.toFixed(2)}, ${transformation.positionInB.y.toFixed(2)}) m`, accent: 'rose' },
+              { label: 'Displacement (B)', value: `(${transformation.displacementInB.x.toFixed(2)}, ${transformation.displacementInB.y.toFixed(2)}) m`, accent: 'emerald' },
             ]}
           />
 
           {/* Telemetry Chart */}
           <PhysicsChart
             data={telemetry.data}
-            timeKey="time"
-            lines={[
-              { key: 'x_A', name: 'Global X (m)', color: '#38bdf8' },
-              { key: 'y_A', name: 'Global Y (m)', color: '#10b981' },
-              { key: 'x_B', name: 'Local X' , color: '#f43f5e' },
-              { key: 'y_B', name: 'Local Y', color: '#fbbf24' },
+            title="Coordinate Telemetry"
+            xKey="time"
+            xLabel="Time (s)"
+            series={[
+              { key: 'x_A', name: 'Global X', color: '#38bdf8', unit: 'm' },
+              { key: 'y_A', name: 'Global Y', color: '#10b981', unit: 'm' },
+              { key: 'x_B', name: 'Local X', color: '#f43f5e', unit: 'm' },
+              { key: 'y_B', name: 'Local Y', color: '#fbbf24', unit: 'm' },
             ]}
             height={220}
           />
@@ -317,20 +315,17 @@ export const PositionDisplacementPage: React.FC = () => {
           <Panel title="Core Physics Concepts" icon={Info}>
             <FormulaList
               formulas={[
-                { name: 'Position Vector', latex: '\\vec{r} = x\\hat{i} + y\\hat{j}' },
-                { name: 'Displacement', latex: '\\Delta\\vec{r} = \\vec{r}_f - \\vec{r}_i' },
-                { name: 'Frame Transformation', latex: '\\vec{r}_B = R(-\\theta)(\\vec{r}_A - \\vec{O}_B)' },
+                '\\vec{r} = x\\hat{i} + y\\hat{j}',
+                '\\Delta\\vec{r} = \\vec{r}_f - \\vec{r}_i',
+                '\\vec{r}_B = R(-\\theta)(\\vec{r}_A - \\vec{O}_B)',
               ]}
             />
             <div className="mt-4 text-xs text-slate-400 space-y-2">
               <p>
-                <strong className="text-slate-200">Position</strong> specifies an object's precise location relative to a chosen origin.
+                <strong className="text-slate-200">Position</strong> specifies an object&apos;s precise location relative to a chosen origin.
               </p>
               <p>
                 <strong className="text-slate-200">Displacement</strong> measures the straight-line vector change in position and is independent of the coordinate origin.
-              </p>
-              <p>
-                <strong className="text-slate-200">Reference Frames</strong> allow observers in different positions or orientations to describe the same physical motion.
               </p>
             </div>
           </Panel>
@@ -339,5 +334,3 @@ export const PositionDisplacementPage: React.FC = () => {
     </LabLayout>
   );
 };
-
-export default PositionDisplacementPage;

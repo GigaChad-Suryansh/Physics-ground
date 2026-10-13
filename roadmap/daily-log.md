@@ -29,3 +29,25 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 2 — 2026-10-13
+
+- **Workflow run:** [#4](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/38377419352)
+- **Trigger:** schedule
+- **Gemini status:** success (fallback model)
+- **Gemini model:** gemini-3.5-flash-lite
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 2 (0 = passed)
+- **Changes present after Gemini:**
+  - ` M roadmap/progress.json`
+  - ` M src/simulations/position-displacement/PositionDisplacementPage.tsx`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-10-13T09:40:00Z
+  - **Current task:** Fix baseline build errors and verify test suite
+  - **Last completed concept ID:** 1
+  - **Completed concepts:** 1
+  - **Notes:** Fixed TypeScript compilation errors in PositionDisplacementPage.tsx (LabLayout props, SimulationControls state prop, ReadoutBar items structure, PhysicsChart series structure, and FormulaList formulas array format). All 47 tests passed and production build succeeded.
+
+---
+
