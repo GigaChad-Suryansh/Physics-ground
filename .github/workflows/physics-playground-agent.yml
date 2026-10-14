@@ -78,6 +78,7 @@ jobs:
 
       - name: Run Gemini CLI developer
         id: gemini
+        continue-on-error: true
         if: steps.pick.outcome == 'success'
         uses: google-github-actions/run-gemini-cli@v0
         env:
@@ -333,4 +334,12 @@ jobs:
             echo "Until then you can open the PR by hand: https://github.com/${GITHUB_REPOSITORY}/compare/main...automation/physics-playground-daily?expand=1"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "::error title=Enable PR creation::Settings > Actions > General > Workflow permissions > tick 'Allow GitHub Actions to create and approve pull requests'. The branch automation/physics-playground-daily already has the changes."
+          exit 1
+
+      # The first attempt is allowed to fail (the fallback model may recover).
+      # The run is only red if no attempt produced a result.
+      - name: Fail if no Gemini attempt succeeded
+        if: always() && steps.gemini.outcome == 'failure' && steps.gemini_retry.outcome != 'success'
+        run: |
+          echo "::error::Gemini failed on every attempt. See roadmap/daily-log.md on the automation branch."
           exit 1
