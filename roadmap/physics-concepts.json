@@ -47,15 +47,37 @@
       "title": "Distance versus displacement",
       "category": "Classical Mechanics",
       "difficulty": "introductory",
-      "status": "pending",
-      "simulation_type": "determine-after-repository-audit",
-      "learning_objectives": [],
-      "key_equations": [],
-      "visualization_requirements": [],
-      "controls": [],
-      "validation_cases": [],
-      "dependencies": [],
-      "notes": "Complete these fields only after reviewing existing site architecture and content."
+      "status": "completed",
+      "simulation_type": "interactive-canvas",
+      "learning_objectives": [
+        "Distinguish between distance (scalar) and displacement (vector).",
+        "Calculate distance as the total path length.",
+        "Calculate displacement as the straight-line change in position.",
+        "Observe how distance is always greater than or equal to the magnitude of displacement."
+      ],
+      "key_equations": [
+        "d = \\int |v(t)| dt",
+        "\\Delta\\vec{r} = \\vec{r}_f - \\vec{r}_i"
+      ],
+      "visualization_requirements": [
+        "Trace of the path taken (total distance)",
+        "Straight line arrow for displacement vector",
+        "Animated object moving along various path types",
+        "Real-time counters for distance and displacement magnitude"
+      ],
+      "controls": [
+        "Path type (Linear, Zig-zag, Circular, Random)",
+        "Path amplitude/scale",
+        "Simulation speed",
+        "Toggle for showing/hiding path trace"
+      ],
+      "validation_cases": [
+        "Distance is 0 if time is 0",
+        "Displacement is 0 if the path is a closed loop",
+        "Distance equals displacement magnitude for unidirectional linear motion"
+      ],
+      "dependencies": [1],
+      "notes": "Implementing with interactive path tracing and real-time scalar vs vector comparison."
     },
     {
       "id": 3,

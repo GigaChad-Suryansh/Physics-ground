@@ -48,6 +48,11 @@ import {
   getPositionAtTime,
   DEFAULT_FRAME_PARAMS,
 } from '../physics/mechanics/position-displacement';
+import {
+  getPathPosition,
+  calculateDisplacement,
+  calculateDistanceStep,
+} from '../physics/mechanics/distance-versus-displacement';
 
 describe('Physics Calculation Verification', () => {
   describe('Module 1: Projectile Motion', () => {
@@ -531,6 +536,49 @@ describe('Physics Calculation Verification', () => {
       const posLinear = getPositionAtTime(2, 'linear');
       expect(posLinear.x).toBe(-3);
       expect(posLinear.y).toBe(-1);
+    });
+  });
+
+  describe('Module 8: Distance versus Displacement', () => {
+    it('calculates distance as an accumulating scalar and displacement as a vector', () => {
+      const p1 = { x: 0, y: 0 };
+      const p2 = { x: 3, y: 4 };
+      const p3 = { x: 0, y: 0 };
+
+      const d1 = calculateDistanceStep(p2, p1); // 5
+      const d2 = calculateDistanceStep(p3, p2); // 5
+      expect(d1 + d2).toBe(10);
+
+      const disp = calculateDisplacement(p3, p1);
+      expect(disp.magnitude).toBe(0);
+      expect(disp.vec.x).toBe(0);
+      expect(disp.vec.y).toBe(0);
+    });
+
+    it('ensures distance >= displacement magnitude for complex paths', () => {
+      const params = { type: 'zigzag' as const, amplitude: 2 };
+      let distance = 0;
+      let prevPos = getPathPosition(0, params);
+      const initialPos = prevPos;
+
+      for (let t = 0.1; t <= 2; t += 0.1) {
+        const currentPos = getPathPosition(t, params);
+        distance += calculateDistanceStep(currentPos, prevPos);
+        const disp = calculateDisplacement(currentPos, initialPos);
+        expect(distance).toBeGreaterThanOrEqual(disp.magnitude - 1e-9);
+        prevPos = currentPos;
+      }
+    });
+
+    it('distance equals displacement magnitude for unidirectional linear motion', () => {
+      const params = { type: 'linear' as const, amplitude: 0 };
+      const initialPos = getPathPosition(0, params);
+      const t = 5;
+      const currentPos = getPathPosition(t, params);
+
+      const disp = calculateDisplacement(currentPos, initialPos);
+      // In linear path: x = 2*t, y = 0. For t=5, x=10.
+      expect(disp.magnitude).toBeCloseTo(10, 5);
     });
   });
 });
