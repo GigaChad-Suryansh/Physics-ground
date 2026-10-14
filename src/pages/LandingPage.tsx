@@ -117,7 +117,7 @@ export const LandingPage: React.FC = () => {
             Laboratory Modules
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-100 mt-1">
-            Explore 6 Interactive Physics Environments
+            Explore {SIMULATION_MODULES.length} Interactive Physics Environments
           </h2>
         </div>
 
