@@ -10,7 +10,7 @@ permissions:
   contents: write
   pull-requests: write
   actions: write
-  issues: read
+  issues: write
 
 concurrency:
   group: physics-playground-autonomous-developer
@@ -347,6 +347,37 @@ jobs:
       - name: Explain auto-merge failure
         if: always() && steps.automerge.outcome == 'failure'
         run: echo "::warning title=Auto-merge skipped::The PR is open and verified; merge it by hand (the branch may be protected or a merge setting is blocking it)."
+
+      # Daily report: one comment per run on a single "Daily agent report" issue.
+      # GitHub turns that into an email / phone push (@mention guarantees it).
+      - name: Post daily report
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GEMINI_OK: ${{ steps.gemini.outcome == 'success' || steps.gemini_retry.outcome == 'success' }}
+          PICK_OK: ${{ steps.pick.outcome == 'success' }}
+          VERIFIED: ${{ steps.verify.outputs.ok }}
+          CHANGED: ${{ steps.verify.outputs.changed }}
+          MERGED: ${{ steps.automerge.outcome == 'success' }}
+          DISCARDED: ${{ steps.discard.outcome == 'success' }}
+          CONCEPT_ID: ${{ steps.brief.outputs.concept_id }}
+        continue-on-error: true
+        run: |
+          if [ "$MERGED" = "true" ]; then icon="✅"; msg="Concept ${CONCEPT_ID} (or a fix) was built, verified, merged and deployed."
+          elif [ "$PICK_OK" != "true" ]; then icon="⏸️"; msg="No Gemini model was available (most likely the free daily quota). Nothing changed; it will try again tomorrow."
+          elif [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="Gemini's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged."
+          elif [ "$GEMINI_OK" != "true" ]; then icon="❌"; msg="Gemini failed on every attempt. Nothing changed."
+          elif [ "$VERIFIED" = "true" ] && [ "$CHANGED" != "true" ]; then icon="ℹ️"; msg="Run finished with no code changes."
+          else icon="👀"; msg="Work is verified but was not auto-merged. Please review the open pull request."
+          fi
+          body="@${OWNER} ${icon} **$(date -u +%Y-%m-%d)** — ${msg}"$'\n\n'"[Run details](${RUN_URL})"
+          num=$(gh issue list --state open --search '"Daily agent report" in:title' --json number --jq '.[0].number' || true)
+          if [ -z "$num" ]; then
+            num=$(gh issue create --title "Daily agent report" --body "One comment per daily run of the Physics Playground agent. Subscribe to this issue to get each report by email or phone." | grep -o '[0-9]*$')
+          fi
+          gh issue comment "$num" --body "$body"
 
       - name: Explain pull request failure
         if: always() && steps.pr.outcome == 'failure'
