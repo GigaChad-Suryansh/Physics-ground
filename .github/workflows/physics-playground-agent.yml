@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
   issues: read
 
 concurrency:
@@ -319,6 +320,33 @@ jobs:
             - The fixed roadmap has exactly 100 concepts.
             - Please review the diff, test results, and progress state before merging.
             - This PR is not deployed until merged to the deployment branch.
+
+      # Auto-merge: only when the workflow's own build + tests + roadmap checks
+      # passed on this exact tree. Turn it off with the repository variable
+      # AUTO_MERGE = false (Settings > Secrets and variables > Actions > Variables).
+      - name: Merge the pull request (verified work only)
+        id: automerge
+        if: >-
+          always() && steps.pr.outcome == 'success'
+          && steps.verify.outputs.ok == 'true'
+          && steps.pr.outputs.pull-request-number != ''
+          && steps.pr.outputs.pull-request-operation != 'closed'
+          && vars.AUTO_MERGE != 'false'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.PR_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.pull-request-number }}
+        run: |
+          gh api -X PUT "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/merge" -f merge_method=squash \
+            -f commit_title="chore: autonomous Physics Playground update (verified)"
+          # Pushes made with GITHUB_TOKEN do not trigger other workflows, so start the site deploy ourselves.
+          gh workflow run deploy.yml --ref main
+          echo "## Auto-merged PR #${PR_NUMBER}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Build, tests and roadmap validation passed on this exact code, so it was merged and a deploy was started." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Explain auto-merge failure
+        if: always() && steps.automerge.outcome == 'failure'
+        run: echo "::warning title=Auto-merge skipped::The PR is open and verified; merge it by hand (the branch may be protected or a merge setting is blocking it)."
 
       - name: Explain pull request failure
         if: always() && steps.pr.outcome == 'failure'
