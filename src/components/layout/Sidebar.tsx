@@ -14,28 +14,6 @@ import {
 
 export const SIMULATION_MODULES = [
   {
-    id: 'position-displacement',
-    name: 'Position & Reference Frames',
-    category: 'Classical Mechanics',
-    path: '/sim/position-displacement',
-    icon: Compass,
-    color: 'text-sky-400',
-    bgColor: 'bg-sky-500/10',
-    description: 'Position vectors, coordinate transformations, and frame-independent displacement.',
-    badge: 'Introductory',
-  },
-  {
-    id: 'distance-versus-displacement',
-    name: 'Distance vs. Displacement',
-    category: 'Classical Mechanics',
-    path: '/sim/distance-versus-displacement',
-    icon: Activity,
-    color: 'text-sky-400',
-    bgColor: 'bg-sky-500/10',
-    description: 'Path length vs straight-line change. Observe how distance always exceeds or equals displacement.',
-    badge: 'Introductory',
-  },
-  {
     id: 'projectile',
     name: 'Projectile Motion',
     category: 'Mechanics',
@@ -100,6 +78,28 @@ export const SIMULATION_MODULES = [
     bgColor: 'bg-rose-500/10',
     description: 'Lenses and mirrors, ray tracing, sign conventions, real vs virtual image formation.',
     badge: 'Ray Optics',
+  },
+  {
+    id: 'position-displacement',
+    name: 'Position & Reference Frames',
+    category: 'Classical Mechanics',
+    path: '/sim/position-displacement',
+    icon: Compass,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: 'Position vectors, coordinate transformations, and frame-independent displacement.',
+    badge: 'Introductory',
+  },
+  {
+    id: 'distance-versus-displacement',
+    name: 'Distance vs. Displacement',
+    category: 'Classical Mechanics',
+    path: '/sim/distance-versus-displacement',
+    icon: Activity,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: 'Path length vs straight-line change. Observe how distance always exceeds or equals displacement.',
+    badge: 'Introductory',
   },
 ];
 
