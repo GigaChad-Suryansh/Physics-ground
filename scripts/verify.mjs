@@ -63,7 +63,21 @@ function completionClaimProblem() {
   }
   return null;
 }
-const claimProblem = completionClaimProblem();
+// Existing modules must keep their order; new ones go at the end of SIMULATION_MODULES.
+function moduleOrderProblem() {
+  const ids = (text) => [...(text.match(/^\s{4}id: '([^']+)'/gm) || [])].map((l) => l.match(/'([^']+)'/)[1]);
+  try {
+    const before = ids(spawnSync('git', ['show', 'HEAD:src/components/layout/Sidebar.tsx'], { encoding: 'utf8' }).stdout || '');
+    const after = ids(fs.readFileSync('src/components/layout/Sidebar.tsx', 'utf8'));
+    const ok = before.every((id, i) => after[i] === id);
+    if (!ok) return `### module order rejected\nExisting entries of SIMULATION_MODULES must keep their order; append new modules at the END. Before: ${before.join(', ')}. After: ${after.join(', ')}.`;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+const orderProblem = moduleOrderProblem();
+const claimProblem = completionClaimProblem() || orderProblem;
 const ok = failed.length === 0 && !claimProblem;
 const errors = [...failed.map(digest), ...(claimProblem ? [claimProblem] : [])].join('\n\n').slice(0, 6000);
 

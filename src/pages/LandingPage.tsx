@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SIMULATION_MODULES } from '../components/layout/Sidebar';
-import { Orbit, Compass, ArrowRight, Sparkles, BookOpen, Layers, CheckCircle } from 'lucide-react';
+import { Orbit, Compass, ArrowRight, Sparkles, BookOpen, Layers, CheckCircle, Search, X } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
+  const [query, setQuery] = useState('');
+  const visibleModules = useMemo(() => {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length === 0) return SIMULATION_MODULES;
+    return SIMULATION_MODULES.filter((mod) => {
+      const hay = `${mod.name} ${mod.category} ${mod.badge} ${mod.description}`.toLowerCase();
+      return terms.every((t) => hay.includes(t));
+    });
+  }, [query]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white relative overflow-hidden">
       {/* Subtle cosmic grid background */}
@@ -112,17 +122,52 @@ export const LandingPage: React.FC = () => {
 
       {/* Simulation Modules Grid */}
       <section id="modules" className="relative z-10 max-w-7xl mx-auto px-6 py-16 space-y-8">
-        <div>
-          <span className="text-xs font-mono uppercase tracking-wider text-sky-400 font-semibold">
-            Laboratory Modules
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-100 mt-1">
-            Explore {SIMULATION_MODULES.length} Interactive Physics Environments
-          </h2>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-wider text-sky-400 font-semibold">
+              Laboratory Modules
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-100 mt-1">
+              Explore {SIMULATION_MODULES.length} Interactive Physics Environments
+            </h2>
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search experiments…"
+              aria-label="Search experiments"
+              className="w-full rounded-xl border border-slate-800 bg-slate-900/70 py-2.5 pl-9 pr-9 text-sm text-slate-200 placeholder:text-slate-500 outline-none transition-colors focus:border-sky-500/60 focus:ring-2 focus:ring-sky-500/20 [&::-webkit-search-cancel-button]:hidden"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery('')}
+                aria-label="Clear search"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-500 hover:text-slate-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
+        {query && (
+          <p className="text-xs font-mono text-slate-500">
+            Showing {visibleModules.length} of {SIMULATION_MODULES.length}
+          </p>
+        )}
+
+        {visibleModules.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-slate-800 p-10 text-center text-sm text-slate-400">
+            No experiments match “{query}”. Try “orbit”, “friction” or “waves”.
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {SIMULATION_MODULES.map((mod) => {
+          {visibleModules.map((mod) => {
             const Icon = mod.icon;
             return (
               <Link
