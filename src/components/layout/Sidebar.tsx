@@ -25,6 +25,17 @@ export const SIMULATION_MODULES = [
     badge: 'Introductory',
   },
   {
+    id: 'distance-versus-displacement',
+    name: 'Distance vs. Displacement',
+    category: 'Classical Mechanics',
+    path: '/sim/distance-versus-displacement',
+    icon: Activity,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: 'Path length vs straight-line change. Observe how distance always exceeds or equals displacement.',
+    badge: 'Introductory',
+  },
+  {
     id: 'projectile',
     name: 'Projectile Motion',
     category: 'Mechanics',
