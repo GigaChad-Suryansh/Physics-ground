@@ -1,12 +1,13 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 3,
+  "last_completed_id": 4,
   "completed_ids": [
     1,
     2,
-    3
+    3,
+    4
   ],
-  "current_task": "Implement Concept 3: Speed and velocity",
+  "current_task": "Implement Concept 4: Acceleration",
   "last_run": "2026-10-15T00:00:00Z",
   "last_outcome": "success",
   "known_bugs": [],
@@ -14,5 +15,5 @@
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Successfully implemented concept 3: Speed and velocity with pure physics model in src/physics/mechanics/speed-velocity.ts, interactive simulation page in src/simulations/speed-velocity/SpeedVelocityPage.tsx, route registration in App.tsx, sidebar entry, and comprehensive unit tests in src/tests/physics.test.ts. Validated with TypeScript type checking, roadmap validation, test suite, and production build."
+  "notes": "Successfully implemented concept 4: Acceleration with pure physics model in src/physics/mechanics/acceleration.ts, interactive simulation page in src/simulations/acceleration/AccelerationPage.tsx, route registration in App.tsx, sidebar entry, and comprehensive unit tests in src/tests/physics.test.ts. Validated with TypeScript type checking, roadmap validation, test suite, and production build."
 }
