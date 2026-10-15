@@ -124,15 +124,38 @@
       "title": "Acceleration",
       "category": "Classical Mechanics",
       "difficulty": "introductory",
-      "status": "pending",
-      "simulation_type": "determine-after-repository-audit",
-      "learning_objectives": [],
-      "key_equations": [],
-      "visualization_requirements": [],
-      "controls": [],
-      "validation_cases": [],
-      "dependencies": [],
-      "notes": "Complete these fields only after reviewing existing site architecture and content."
+      "status": "completed",
+      "simulation_type": "interactive-canvas",
+      "learning_objectives": [
+        "Understand acceleration as the rate of change of velocity (vector and scalar).",
+        "Distinguish between constant linear acceleration, free-fall acceleration, and centripetal acceleration.",
+        "Observe kinematic relationships: v = v_0 + at and x = x_0 + v_0 t + 1/2 a t^2.",
+        "Visualize acceleration vector arrows alongside velocity and position."
+      ],
+      "key_equations": [
+        "\\vec{a} = \\frac{d\\vec{v}}{dt} = \\frac{d^2\\vec{r}}{dt^2}",
+        "v(t) = v_0 + at",
+        "x(t) = x_0 + v_0 t + \\frac{1}{2}at^2",
+        "a_c = \\frac{v^2}{R} = \\omega^2 R"
+      ],
+      "visualization_requirements": [
+        "Animated object moving along trajectory (Linear Accelerated, Free Fall, Circular Motion)",
+        "Velocity vector (green) and Acceleration vector (rose/red) arrows",
+        "Real-time telemetry and numerical readouts for position, velocity, and acceleration",
+        "Physics charts plotting velocity and acceleration components over time"
+      ],
+      "controls": [
+        "Motion mode (Linear Acceleration, Free Fall, Circular / Centripetal)",
+        "Initial velocity and acceleration / gravity / radius parameters",
+        "Simulation Play/Pause/Reset, Step, and Speed controls"
+      ],
+      "validation_cases": [
+        "Constant acceleration yields linear velocity-time graph and parabolic position-time graph",
+        "Free fall under gravity g yields velocity increasing at rate g",
+        "Uniform circular motion yields constant speed with centripetal acceleration pointing inward"
+      ],
+      "dependencies": [3],
+      "notes": "Fully implemented with interactive canvas, acceleration vector visualization, kinematics equations, and test coverage."
     },
     {
       "id": 5,

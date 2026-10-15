@@ -57,6 +57,10 @@ import {
   getMotionState,
   calculateAverages,
 } from '../physics/mechanics/speed-velocity';
+import {
+  getAccelerationState,
+  DEFAULT_ACCELERATION_PARAMS,
+} from '../physics/mechanics/acceleration';
 
 describe('Physics Calculation Verification', () => {
   describe('Module 1: Projectile Motion', () => {
@@ -637,6 +641,60 @@ describe('Physics Calculation Verification', () => {
       expect(s1.velocity.y).toBe(0);
       expect(s2.velocity.x).toBe(3);
       expect(s2.velocity.y).toBe(0);
+    });
+  });
+
+  describe('Module 10: Acceleration', () => {
+    it('uniformly accelerated linear motion matches kinematics equations', () => {
+      const params = {
+        ...DEFAULT_ACCELERATION_PARAMS,
+        mode: 'linear' as const,
+        initialVelocity: 2,
+        acceleration: 3,
+      };
+      const t = 4;
+      const state = getAccelerationState(t, params);
+
+      // v = v0 + at = 2 + 3*4 = 14
+      expect(state.velocity.x).toBe(14);
+      expect(state.acceleration.x).toBe(3);
+
+      // x = x0 + v0*t + 0.5*a*t^2 = -5 + 2*4 + 0.5*3*16 = -5 + 8 + 24 = 27
+      expect(state.position.x).toBe(27);
+    });
+
+    it('free fall motion matches vertical gravity kinematics', () => {
+      const params = {
+        ...DEFAULT_ACCELERATION_PARAMS,
+        mode: 'freefall' as const,
+        initialVelocity: 0,
+        gravity: 9.8,
+      };
+      const t = 2;
+      const state = getAccelerationState(t, params);
+
+      // vy = -9.8 * 2 = -19.6
+      expect(state.velocity.y).toBeCloseTo(-19.6, 5);
+      expect(state.acceleration.y).toBe(-9.8);
+
+      // y = 12 - 0.5 * 9.8 * 4 = 12 - 19.6 = -7.6 -> clamped at 0 if it hits ground, but at t=2: 12 - 19.6 = -7.6 -> clamped to 0
+      expect(state.position.y).toBe(0);
+    });
+
+    it('uniform circular motion yields centripetal acceleration ac = omega^2 * R', () => {
+      const params = {
+        ...DEFAULT_ACCELERATION_PARAMS,
+        mode: 'circular' as const,
+        amplitude: 3,
+        frequency: 0.5,
+      };
+      const t = 1;
+      const state = getAccelerationState(t, params);
+      const omega = 2 * Math.PI * params.frequency; // pi rad/s
+      const expectedAC = omega * omega * params.amplitude;
+
+      const aMag = Math.sqrt(state.acceleration.x ** 2 + state.acceleration.y ** 2);
+      expect(aMag).toBeCloseTo(expectedAC, 5);
     });
   });
 });

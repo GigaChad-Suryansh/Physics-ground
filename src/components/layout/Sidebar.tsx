@@ -113,6 +113,17 @@ export const SIMULATION_MODULES = [
     description: 'Instantaneous and average scalar speed vs vector velocity. Visualize velocity arrows and path rates.',
     badge: 'Introductory',
   },
+  {
+    id: 'acceleration',
+    name: 'Acceleration Lab',
+    category: 'Classical Mechanics',
+    path: '/sim/acceleration',
+    icon: Gauge,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: 'Instantaneous acceleration, linear acceleration kinematics, free fall, and centripetal acceleration.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
