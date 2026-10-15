@@ -59,3 +59,32 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 3 — 2026-10-15
+
+- **Workflow run:** [#8](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/38697653192)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** failure
+- **Gemini model:** gemini-3-flash-preview
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Changes present after verification:**
+  - ` M roadmap/physics-concepts.json`
+  - ` M roadmap/progress.json`
+  - ` M src/App.tsx`
+  - ` M src/components/layout/Sidebar.tsx`
+  - ` M src/tests/physics.test.ts`
+  - `?? src/physics/mechanics/speed-velocity.ts`
+  - `?? src/simulations/speed-velocity/`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-10-15T00:00:00Z
+  - **Current task:** Implement Concept 3: Speed and velocity
+  - **Last completed concept ID:** 3
+  - **Completed concepts:** 3
+  - **Notes:** Successfully implemented concept 3: Speed and velocity with pure physics model in src/physics/mechanics/speed-velocity.ts, interactive simulation page in src/simulations/speed-velocity/SpeedVelocityPage.tsx, route registration in App.tsx, sidebar entry, and comprehensive unit tests in src/tests/physics.test.ts. Validated with TypeScript type checking, roadmap validation, test suite, and production build.
+
+---
+

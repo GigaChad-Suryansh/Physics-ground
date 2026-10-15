@@ -53,6 +53,10 @@ import {
   calculateDisplacement,
   calculateDistanceStep,
 } from '../physics/mechanics/distance-versus-displacement';
+import {
+  getMotionState,
+  calculateAverages,
+} from '../physics/mechanics/speed-velocity';
 
 describe('Physics Calculation Verification', () => {
   describe('Module 1: Projectile Motion', () => {
@@ -579,6 +583,60 @@ describe('Physics Calculation Verification', () => {
       const disp = calculateDisplacement(currentPos, initialPos);
       // In linear path: x = 2*t, y = 0. For t=5, x=10.
       expect(disp.magnitude).toBeCloseTo(10, 5);
+    });
+  });
+
+  describe('Module 9: Speed and Velocity', () => {
+    it('instantaneous speed is the magnitude of the velocity vector', () => {
+      const params = { type: 'sinusoidal' as const, amplitude: 2, frequency: 0.5, speed: 2 };
+      const state = getMotionState(1.2, params);
+      const magnitude = Math.sqrt(state.velocity.x ** 2 + state.velocity.y ** 2);
+      expect(state.speed).toBeCloseTo(magnitude, 8);
+    });
+
+    it('calculates average speed and velocity correctly', () => {
+      const distance = 10;
+      const displacement = { x: 6, y: 0 };
+      const time = 2;
+      const averages = calculateAverages(distance, displacement, time);
+
+      expect(averages.averageSpeed).toBe(5);
+      expect(averages.averageVelocity.x).toBe(3);
+      expect(averages.averageVelocity.y).toBe(0);
+    });
+
+    it('average velocity is zero for a full circular path', () => {
+      const params = { type: 'circular' as const, amplitude: 3, frequency: 0.1, speed: 2 };
+      const T = 1 / params.frequency; // Period = 10s
+      
+      const start = getMotionState(0, params);
+      const end = getMotionState(T, params);
+      
+      const displacement = {
+        x: end.position.x - start.position.x,
+        y: end.position.y - start.position.y
+      };
+      
+      // Displacement should be zero (back to start)
+      expect(displacement.x).toBeCloseTo(0, 8);
+      expect(displacement.y).toBeCloseTo(0, 8);
+      
+      const averages = calculateAverages(2 * Math.PI * params.amplitude, displacement, T);
+      expect(averages.averageVelocity.x).toBeCloseTo(0, 8);
+      expect(averages.averageVelocity.y).toBeCloseTo(0, 8);
+      // Average speed should be 2*pi*R / T = 2*pi*3 / 10 = 1.8849
+      expect(averages.averageSpeed).toBeCloseTo(1.88495, 4);
+    });
+
+    it('linear motion has constant velocity', () => {
+      const params = { type: 'linear' as const, amplitude: 0, frequency: 0, speed: 3 };
+      const s1 = getMotionState(1, params);
+      const s2 = getMotionState(5, params);
+      
+      expect(s1.velocity.x).toBe(3);
+      expect(s1.velocity.y).toBe(0);
+      expect(s2.velocity.x).toBe(3);
+      expect(s2.velocity.y).toBe(0);
     });
   });
 });

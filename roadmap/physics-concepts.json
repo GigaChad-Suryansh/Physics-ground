@@ -85,15 +85,38 @@
       "title": "Speed and velocity",
       "category": "Classical Mechanics",
       "difficulty": "introductory",
-      "status": "pending",
-      "simulation_type": "determine-after-repository-audit",
-      "learning_objectives": [],
-      "key_equations": [],
-      "visualization_requirements": [],
-      "controls": [],
-      "validation_cases": [],
-      "dependencies": [],
-      "notes": "Complete these fields only after reviewing existing site architecture and content."
+      "status": "completed",
+      "simulation_type": "interactive-canvas",
+      "learning_objectives": [
+        "Distinguish between average speed (scalar) and average velocity (vector).",
+        "Calculate average velocity as displacement divided by time (v_avg = Δr / Δt).",
+        "Calculate average speed as total distance divided by time (s_avg = d / Δt).",
+        "Observe instantaneous velocity as the rate of change of position."
+      ],
+      "key_equations": [
+        "\\vec{v}_{avg} = \\frac{\\Delta\\vec{r}}{\\Delta t}",
+        "v_{avg} = \\frac{d}{\\Delta t}",
+        "\\vec{v} = \\frac{d\\vec{r}}{dt}"
+      ],
+      "visualization_requirements": [
+        "Animated object moving along multiple trajectory types (Linear, Circular, Sine)",
+        "Velocity vector arrow (instantaneous velocity) showing direction and magnitude",
+        "Real-time readouts for instantaneous speed, velocity vector, and averages",
+        "Telemetry graphs for speed and velocity components over time"
+      ],
+      "controls": [
+        "Trajectory selection (Linear, Circular, Sinusoidal)",
+        "Motion amplitude and frequency/speed parameters",
+        "Toggle for showing/hiding velocity vector",
+        "Simulation Play/Pause/Reset and Speed controls"
+      ],
+      "validation_cases": [
+        "Average velocity is zero for any closed-loop path completed in time T",
+        "Average speed equals magnitude of constant velocity for unidirectional linear motion",
+        "Instantaneous speed is always the magnitude of the instantaneous velocity vector"
+      ],
+      "dependencies": [2],
+      "notes": "Implementing interactive speed vs velocity comparison with vector visualization."
     },
     {
       "id": 4,
