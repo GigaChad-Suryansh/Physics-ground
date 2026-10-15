@@ -4,6 +4,7 @@ import { LandingPage } from './pages/LandingPage';
 import { ProjectileMotionPage } from './simulations/projectile/ProjectileMotionPage';
 import { PositionDisplacementPage } from './simulations/position-displacement/PositionDisplacementPage';
 import { DistanceDisplacementPage } from './simulations/distance-versus-displacement/DistanceDisplacementPage';
+import { SpeedVelocityPage } from './simulations/speed-velocity/SpeedVelocityPage';
 import { ForcesPage } from './simulations/forces/ForcesPage';
 import { OrbitalPage } from './simulations/orbital/OrbitalPage';
 import { WavesPage } from './simulations/waves/WavesPage';
@@ -17,6 +18,7 @@ export const App: React.FC = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/sim/position-displacement" element={<PositionDisplacementPage />} />
         <Route path="/sim/distance-versus-displacement" element={<DistanceDisplacementPage />} />
+        <Route path="/sim/speed-and-velocity" element={<SpeedVelocityPage />} />
         <Route path="/sim/projectile" element={<ProjectileMotionPage />} />
         <Route path="/sim/forces" element={<ForcesPage />} />
         <Route path="/sim/orbital" element={<OrbitalPage />} />
