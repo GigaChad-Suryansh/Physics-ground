@@ -328,7 +328,7 @@ jobs:
         id: automerge
         if: >-
           always() && steps.pr.outcome == 'success'
-          && steps.verify.outputs.ok == 'true'
+          && (steps.verify.outputs.ok == 'true' || steps.discard.outcome == 'success')
           && steps.pr.outputs.pull-request-number != ''
           && steps.pr.outputs.pull-request-operation != 'closed'
           && vars.AUTO_MERGE != 'false'
