@@ -69,6 +69,18 @@ function extractApi(file) {
         if (i + 1 < lines.length) block.push(lines[++i]);
       }
       out.push(block.filter((x) => x.trim() !== '').join('\n'));
+    } else if (/^export\s+const\s+\w+(\s*:[^=]+)?\s*=\s*\{\s*$/.test(l)) {
+      // Object literal constant (e.g. CANVAS_COLORS): list its keys so the agent cannot invent new ones.
+      const name = l.match(/^export\s+const\s+(\w+)/)[1];
+      const keys = [];
+      let j = i + 1;
+      while (j < lines.length && !/^\}/.test(lines[j])) {
+        const m = lines[j].match(/^ {2}['"]?([\w-]+)['"]?\s*:/);
+        if (m) keys.push(m[1]);
+        j++;
+      }
+      out.push(`export const ${name}: object with EXACTLY these keys: ${keys.join(', ')}`);
+      i = j;
     } else if (/^export\s+(async\s+)?function\s+\w+/.test(l) || /^export\s+const\s+\w+\s*[:=]/.test(l)) {
       // Signature only: join lines until <> () {} are balanced, then cut at " = " / body.
       let sig = l;
