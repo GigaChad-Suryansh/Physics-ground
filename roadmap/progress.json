@@ -7,13 +7,18 @@
     3,
     4
   ],
-  "current_task": "Implement Concept 4: Acceleration",
-  "last_run": "2026-10-15T00:00:00Z",
-  "last_outcome": "success",
+  "current_task": "Retry concept 5",
+  "last_run": "2026-10-16T07:33:50.003Z",
+  "last_outcome": "failed_verification",
   "known_bugs": [],
   "blocked_concepts": [],
-  "consecutive_failures": 0,
+  "consecutive_failures": 1,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Successfully implemented concept 4: Acceleration with pure physics model in src/physics/mechanics/acceleration.ts, interactive simulation page in src/simulations/acceleration/AccelerationPage.tsx, route registration in App.tsx, sidebar entry, and comprehensive unit tests in src/tests/physics.test.ts. Validated with TypeScript type checking, roadmap validation, test suite, and production build."
+  "notes": "Last run: the agent's changes did not pass build/tests and were discarded by the workflow. Nothing was marked complete.",
+  "last_failure": {
+    "concept_id": 5,
+    "note": "### roadmap validation failed Error: Completed concept statuses must match progress.completed_ids. ### build (tsc + vite) failed src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx(92,53): error TS2339: Property 'accent' does not exist on type '{ bg: string; bgDeep: string; grid: string; gridStrong: string; axis: string; text: string; textBright: string; }'. src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx(96,92): error TS2339: Property 'velocity' does not exist on",
+    "at": "2026-10-16T07:33:50.003Z"
+  }
 }
