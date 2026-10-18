@@ -8,17 +8,22 @@
     4
   ],
   "current_task": "Retry concept 5",
-  "last_run": "2026-10-17T07:11:15.108Z",
+  "last_run": "2026-10-18T07:29:07.139Z",
   "last_outcome": "failed_verification",
   "known_bugs": [],
-  "blocked_concepts": [],
-  "consecutive_failures": 2,
+  "blocked_concepts": [
+    {
+      "id": 5,
+      "reason": "3 consecutive failed attempts. Last error: ### build (tsc + vite) failed src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx(627,145): error TS2304: Cannot find name 'a'."
+    }
+  ],
+  "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
   "notes": "Last run: the agent's changes did not pass build/tests and were discarded by the workflow. Nothing was marked complete.",
   "last_failure": {
     "concept_id": 5,
-    "note": "### build (tsc + vite) failed src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx(254,79): error TS2339: Property 'isRunning' does not exist on type 'SimulationState'. src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx(385,146): error TS2304: Cannot find name 'r'. src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx(385,156): error TS2304: Cannot find name 'v'.",
-    "at": "2026-10-17T07:11:15.108Z"
+    "note": "### build (tsc + vite) failed src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx(627,145): error TS2304: Cannot find name 'a'.",
+    "at": "2026-10-18T07:29:07.139Z"
   }
 }
