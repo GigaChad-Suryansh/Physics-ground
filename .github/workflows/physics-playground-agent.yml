@@ -365,9 +365,9 @@ jobs:
           CONCEPT_ID: ${{ steps.brief.outputs.concept_id }}
         continue-on-error: true
         run: |
-          if [ "$MERGED" = "true" ]; then icon="✅"; msg="Concept ${CONCEPT_ID} (or a fix) was built, verified, merged and deployed."
+          if [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="Gemini's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged; the failure note was saved so the next run can learn from it."
+          elif [ "$MERGED" = "true" ]; then icon="✅"; msg="Concept ${CONCEPT_ID} (or a fix) was built, verified, merged and deployed."
           elif [ "$PICK_OK" != "true" ]; then icon="⏸️"; msg="No Gemini model was available (most likely the free daily quota). Nothing changed; it will try again tomorrow."
-          elif [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="Gemini's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged."
           elif [ "$GEMINI_OK" != "true" ]; then icon="❌"; msg="Gemini failed on every attempt. Nothing changed."
           elif [ "$VERIFIED" = "true" ] && [ "$CHANGED" != "true" ]; then icon="ℹ️"; msg="Run finished with no code changes."
           else icon="👀"; msg="Work is verified but was not auto-merged. Please review the open pull request."

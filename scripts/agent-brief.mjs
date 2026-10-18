@@ -159,6 +159,7 @@ Fill in the empty fields of the concept (learning_objectives, key_equations, vis
 - Page: \`src/simulations/<slug>/<Name>Page.tsx\`. COPY THE STRUCTURE of \`src/simulations/projectile/ProjectileMotionPage.tsx\`: LabLayout, SimulationControls, SimCanvas (+ helpers in src/components/canvas/draw.ts), Panel/ReadoutBar/FormulaList (src/components/ui/Panel.tsx), Slider, PhysicsChart, useSimulation, useTelemetry, and a \`paramsRef\` so changing a slider calls reset() with fresh values.
 - Register it: add a route in \`src/App.tsx\` and an entry in \`SIMULATION_MODULES\` in \`src/components/layout/Sidebar.tsx\` (the landing page reads that list).
 - Tests: add cases to \`src/tests/physics.test.ts\` that compare against analytical results (use the existing describe blocks as a template). Never weaken existing tests.
+- KEEP THE PAGE SMALL AND SIMPLE: at most ~300 lines, one canvas, one chart, 2-4 sliders, copy `src/simulations/speed-velocity/SpeedVelocityPage.tsx` (the shortest working example) and change only the physics. Long pages are where the typos that break the build come from.
 - Do not use <canvas> directly, do not add dependencies, do not redesign existing pages.
 `);
 }
