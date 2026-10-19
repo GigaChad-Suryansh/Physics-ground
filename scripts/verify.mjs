@@ -33,6 +33,8 @@ function digest(res) {
 }
 
 const results = [
+  // The workflow's own scripts must at least parse and the brief must build (a syntax error here silently stops every daily run).
+  run('workflow scripts', 'node', ['-e', "const {spawnSync:s}=require('node:child_process');const fs=require('node:fs');let bad=0;for(const f of fs.readdirSync('scripts').filter(f=>f.endsWith('.mjs'))){const r=s('node',['--check','scripts/'+f]);if(r.status){bad=1;console.error('syntax error in scripts/'+f+': '+r.stderr)}}const b=s('node',['scripts/agent-brief.mjs'],{env:{...process.env,GITHUB_OUTPUT:'',TEST_EXIT:'0',BUILD_EXIT:'0'}});if(b.status){bad=1;console.error('agent-brief.mjs failed: '+b.stderr)}process.exit(bad)"]),
   run('roadmap validation', 'node', ['scripts/validate-roadmap.mjs']),
   run('build (tsc + vite)', 'npm', ['run', 'build']),
   run('tests', 'npm', ['test']),
