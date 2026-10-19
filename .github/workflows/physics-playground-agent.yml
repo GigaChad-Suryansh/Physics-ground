@@ -89,7 +89,7 @@ jobs:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ steps.pick.outputs.model }}
           upload_artifacts: true
-          gemini_debug: true
+          gemini_debug: false
           prompt: |
             You are the repository's autonomous physics-simulation developer. Follow GEMINI.md and the brief below exactly.
             Never claim deployment; never add concept 101; never weaken tests. Do not commit, push, create branches, or open PRs; the workflow makes the PR.
@@ -124,7 +124,7 @@ jobs:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ steps.pick.outputs.fallback_model }}
           upload_artifacts: true
-          gemini_debug: true
+          gemini_debug: false
           prompt: |
             You are the repository's autonomous physics-simulation developer. Follow GEMINI.md and the brief below exactly.
             Never claim deployment; never add concept 101; never weaken tests. Do not commit, push, create branches, or open PRs; the workflow makes the PR.
@@ -176,7 +176,7 @@ jobs:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ steps.pick.outputs.fallback_model || steps.pick.outputs.model }}
           upload_artifacts: true
-          gemini_debug: true
+          gemini_debug: false
           prompt: |
             You are the repository's autonomous physics-simulation developer. Follow GEMINI.md.
             The work currently in the working tree FAILS the build/tests. Fix ONLY these errors; do not add features, do not delete or weaken tests.
