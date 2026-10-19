@@ -180,14 +180,38 @@
       "category": "Classical Mechanics",
       "difficulty": "introductory",
       "status": "pending",
-      "simulation_type": "determine-after-repository-audit",
-      "learning_objectives": [],
-      "key_equations": [],
-      "visualization_requirements": [],
-      "controls": [],
-      "validation_cases": [],
-      "dependencies": [],
-      "notes": "Complete these fields only after reviewing existing site architecture and content."
+      "simulation_type": "interactive-canvas",
+      "learning_objectives": [
+        "Apply SUVAT equations to calculate displacement, velocity, and time.",
+        "Observe the parabolic relationship between position and time under constant acceleration.",
+        "Verify the timeless equation (v^2 = v0^2 + 2aΔx) for different scenarios.",
+        "Understand how gravity and friction affect acceleration on an inclined ramp."
+      ],
+      "key_equations": [
+        "v = v_0 + at",
+        "x = x_0 + v_0t + 1/2at^2",
+        "v^2 = v_0^2 + 2a\\Delta x",
+        "a_{ramp} = g(\\sin\\theta - \\mu\\cos\\theta)"
+      ],
+      "visualization_requirements": [
+        "Interactive canvas with 1D/2D motion tracks (Horizontal, Free Fall, Ramp)",
+        "Velocity and acceleration vector arrows",
+        "Path tracing and strobe-like position markers",
+        "Real-time charts for x(t), v(t), and a(t)"
+      ],
+      "controls": [
+        "Scenario selection (Horizontal, Free Fall, Ramp)",
+        "Initial velocity and position sliders",
+        "Acceleration / Gravity / Ramp Angle / Friction sliders",
+        "Simulation Play/Pause/Reset and Speed controls"
+      ],
+      "validation_cases": [
+        "v squared difference should be approximately zero",
+        "Final velocity matches v0 + at",
+        "Displacement matches v0t + 0.5at^2"
+      ],
+      "dependencies": [4],
+      "notes": "Implementing with multiple scenarios and analytical validation."
     },
     {
       "id": 7,

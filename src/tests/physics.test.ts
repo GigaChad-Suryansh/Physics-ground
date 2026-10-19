@@ -61,6 +61,10 @@ import {
   getAccelerationState,
   DEFAULT_ACCELERATION_PARAMS,
 } from '../physics/mechanics/acceleration';
+import {
+  getUAMState,
+  DEFAULT_UAM_PARAMS,
+} from '../physics/mechanics/uniformly-accelerated-motion';
 
 describe('Physics Calculation Verification', () => {
   describe('Module 1: Projectile Motion', () => {
@@ -695,6 +699,71 @@ describe('Physics Calculation Verification', () => {
 
       const aMag = Math.sqrt(state.acceleration.x ** 2 + state.acceleration.y ** 2);
       expect(aMag).toBeCloseTo(expectedAC, 5);
+    });
+  });
+
+  describe('Module 11: Uniformly Accelerated Motion', () => {
+    it('verifies horizontal SUVAT: v = v0 + at and s = v0t + 0.5at^2', () => {
+      const params = {
+        ...DEFAULT_UAM_PARAMS,
+        scenario: 'horizontal' as const,
+        initialPosition: 5,
+        initialVelocity: 10,
+        acceleration: 2,
+      };
+      const t = 3;
+      const state = getUAMState(t, params);
+
+      // v = 10 + 2*3 = 16
+      expect(state.velocity.x).toBe(16);
+      // disp = 10*3 + 0.5*2*9 = 30 + 9 = 39
+      expect(state.displacement).toBe(39);
+      // pos = 5 + 39 = 44
+      expect(state.position.x).toBe(44);
+    });
+
+    it('verifies timeless equation: v^2 = v0^2 + 2as', () => {
+      const params = {
+        ...DEFAULT_UAM_PARAMS,
+        scenario: 'horizontal' as const,
+        initialVelocity: 5,
+        acceleration: 4,
+      };
+      const t = 2;
+      const state = getUAMState(t, params);
+
+      // v = 5 + 4*2 = 13 -> v^2 = 169
+      // s = 5*2 + 0.5*4*4 = 10 + 8 = 18
+      // v0^2 + 2as = 25 + 2*4*18 = 25 + 144 = 169
+      expect(state.vSquaredDiff).toBeCloseTo(0, 10);
+    });
+
+    it('calculates ramp acceleration correctly with friction', () => {
+      const params = {
+        ...DEFAULT_UAM_PARAMS,
+        scenario: 'ramp' as const,
+        gravity: 10,
+        rampAngle: 30, // sin(30)=0.5, cos(30)=0.866
+        frictionCoeff: 0.1,
+      };
+      const state = getUAMState(0, params);
+      // a = 10 * (0.5 - 0.1 * 0.866) = 10 * (0.5 - 0.0866) = 10 * 0.4134 = 4.134
+      expect(state.effectiveAccel).toBeCloseTo(4.134, 3);
+    });
+
+    it('free fall stops at ground level (y=0)', () => {
+      const params = {
+        ...DEFAULT_UAM_PARAMS,
+        scenario: 'freefall' as const,
+        initialPosition: 20,
+        initialVelocity: 0,
+        gravity: 10,
+      };
+      // Hits ground at t = sqrt(2h/g) = sqrt(40/10) = 2s
+      const stateAt3s = getUAMState(3, params);
+      expect(stateAt3s.position.y).toBe(0);
+      expect(stateAt3s.velocity.y).toBe(0);
+      expect(stateAt3s.displacement).toBe(-20);
     });
   });
 });

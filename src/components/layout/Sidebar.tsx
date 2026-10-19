@@ -124,6 +124,17 @@ export const SIMULATION_MODULES = [
     description: 'Instantaneous acceleration, linear acceleration kinematics, free fall, and centripetal acceleration.',
     badge: 'Introductory',
   },
+  {
+    id: 'uniformly-accelerated-motion',
+    name: 'Uniformly Accelerated Motion',
+    category: 'Classical Mechanics',
+    path: '/sim/uniformly-accelerated-motion',
+    icon: Gauge,
+    color: 'text-amber-400',
+    bgColor: 'bg-amber-500/10',
+    description: 'SUVAT equations in action: constant acceleration along horizontal tracks, free fall, and inclined ramps with friction.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
