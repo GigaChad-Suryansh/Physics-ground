@@ -1,9 +1,9 @@
 name: Physics Playground Autonomous Developer
 
 on:
-  schedule:
-    # Daily at 08:00 India Standard Time (02:30 UTC)
-    - cron: "30 2 * * *"
+  # No GitHub "schedule" on purpose: GitHub's timer starts hours late. The daily start comes from
+  # cron-job.org (13:45 IST, after Gemini's free quota resets at 12:30 IST) calling this
+  # workflow_dispatch endpoint. Run by hand: Actions > Run workflow.
   workflow_dispatch:
 
 permissions:
