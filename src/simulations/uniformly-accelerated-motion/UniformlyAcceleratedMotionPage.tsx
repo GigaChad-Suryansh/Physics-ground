@@ -41,6 +41,7 @@ export const UniformlyAcceleratedMotionPage: React.FC = () => {
         time: t,
         speed: state.speed,
         disp: state.displacement,
+        accel: state.effectiveAccel,
         vx: state.velocity.x,
         vy: state.velocity.y,
         ax: state.acceleration.x,
@@ -189,6 +190,7 @@ export const UniformlyAcceleratedMotionPage: React.FC = () => {
             series={[
               { key: 'disp', name: 'Displacement (s)', color: '#38bdf8', unit: 'm' },
               { key: 'speed', name: 'Velocity (v)', color: '#10b981', unit: 'm/s' },
+              { key: 'accel', name: 'Acceleration (a)', color: '#f43f5e', unit: 'm/s²', axis: 'right' },
             ]}
             xLabel="Time (s)"
           />
