@@ -65,7 +65,6 @@ jobs:
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NVIDIA_MODEL: ${{ vars.NVIDIA_MODEL }}
-          NVIDIA_PICK_TIMEOUT_MS: 60000
         run: node scripts/pick-nim-model.mjs
 
       # Deterministic work (which concept is next, which files exist, what the
