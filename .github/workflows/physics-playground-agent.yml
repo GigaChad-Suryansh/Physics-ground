@@ -194,20 +194,14 @@ jobs:
             printf '## Day %s — %s\n\n' "$day_number" "$date_utc"
             printf -- '- **Workflow run:** [#%s](https://github.com/%s/actions/runs/%s)\n' "$GITHUB_RUN_NUMBER" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
             printf -- '- **Trigger:** %s\n' "$GITHUB_EVENT_NAME"
-            printf -- '- **Gemini status:** %s\n' "$NIM_OUTCOME"
-            printf -- '- **Gemini model:** %s\n' "${NIM_MODEL_USED:-none}"
+            printf -- '- **NVIDIA NIM status:** %s\n' "$NIM_OUTCOME"
+            printf -- '- **NVIDIA NIM model:** %s\n' "${NIM_MODEL_USED:-none}"
             printf -- '- **Baseline tests exit code:** %s (0 = passed)\n' "$BASELINE_TEST_EXIT"
             printf -- '- **Baseline build exit code:** %s (0 = passed)\n' "$BASELINE_BUILD_EXIT"
             printf -- '- **Independent verification (build + tests):** %s\n' "$([ "$VERIFY_OK" = "true" ] && echo passed || echo FAILED)"
             printf -- '- **Repair attempt:** %s\n' "${REPAIR_OUTCOME:-skipped}"
             if [ -n "${DISCARDED_FILES:-}" ]; then
               printf -- '- **Agent work discarded (did not build/pass tests):** %s\n' "$DISCARDED_FILES"
-            fi
-            if [ -n "${GEMINI_ERROR:-}" ]; then
-              printf -- '- **Gemini error output:** %s\n' "$(printf '%s' "$GEMINI_ERROR" | tr '\n' ' ' | tail -c 1800)"
-            fi
-            if [ -n "${GEMINI_SUMMARY:-}" ]; then
-              printf -- '- **Gemini summary:** %s\n' "$(printf '%s' "$GEMINI_SUMMARY" | tr '\n' ' ' | cut -c1-800)"
             fi
             printf -- '- **Changes present after verification:**\n'
             changed_files=$(git status --short | sed '/roadmap\/daily-log\.md/d' || true)
@@ -252,7 +246,7 @@ jobs:
           title: "chore: autonomous Physics Playground maintenance and run log"
           commit-message: "chore: autonomous Physics Playground maintenance and run log"
           body: |
-            Automated proposal from the daily Gemini developer workflow.
+            Automated proposal from the daily NVIDIA NIM developer workflow.
 
             - Existing bugs and failing checks must be handled before roadmap features.
             - The fixed roadmap has exactly 100 concepts.
@@ -305,8 +299,8 @@ jobs:
         continue-on-error: true
         run: |
           if [ "$PICK_OK" != "true" ]; then icon="⏸️"; msg="No NVIDIA NIM model was available (most likely the free daily quota). Nothing changed; it will try again next run."
-          elif [ "$BRIEF_OK" != "true" ]; then icon="❌"; msg="The workflow could not prepare today's task for Gemini (an internal error, not Gemini). Nothing changed. See the run details."
-          elif [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="Gemini's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged; the failure note was saved so the next run can learn from it."
+          elif [ "$BRIEF_OK" != "true" ]; then icon="❌"; msg="The workflow could not prepare today's task for NVIDIA NIM (an internal workflow error, not NVIDIA NIM). Nothing changed. See the run details."
+          elif [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="NVIDIA NIM's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged; the failure note was saved so the next run can learn from it."
           elif [ "$NIM_OK" != "true" ]; then icon="❌"; msg="NVIDIA NIM failed on every attempt. Nothing changed."
           elif [ "$VERIFIED" = "true" ] && [ "$CHANGED" != "true" ]; then icon="ℹ️"; msg="Run finished with no code changes."
           elif [ "$MERGED" = "true" ]; then icon="✅"; msg="Concept ${CONCEPT_ID} (or a fix) was built, verified, merged and deployed."
