@@ -1,17 +1,17 @@
-# Enable the Gemini autonomous developer
+# Enable the NVIDIA NIM autonomous developer
 
-The workflow is committed in `.github/workflows/physics-playground-agent.yml`, but it will not call Gemini until you add a repository secret.
+The workflow is committed in `.github/workflows/physics-playground-agent.yml`, but it will not call NVIDIA NIM until you add a repository secret.
 
-## 1. Create a Gemini API key
-1. Open [Google AI Studio](https://aistudio.google.com/apikey).
-2. Create an API key for the Gemini API.
-3. Check the current [Gemini API pricing and free-tier limits](https://ai.google.dev/gemini-api/docs/pricing). Free access depends on the selected model, region, and quotas; it is not an unlimited guarantee.
+## 1. Create an NVIDIA API key
+1. Open the [NVIDIA API Catalog](https://build.nvidia.com/).
+2. Generate an API key for hosted NVIDIA NIM endpoints.
+3. Check the selected model's current usage limits and availability in the NVIDIA API Catalog; limits may vary by model and account.
 
 ## 2. Add the key to GitHub
 1. Open this repository: [Physics-ground](https://github.com/GigaChad-Suryansh/Physics-ground).
 2. Go to **Settings → Secrets and variables → Actions**.
 3. Select **New repository secret**.
-4. Name it exactly `GEMINI_API_KEY`.
+4. Name it exactly `NVIDIA_API_KEY`.
 5. Paste the key as the value and save it.
 
 Never put the key in source files, website JavaScript, commits, or screenshots.
@@ -41,8 +41,8 @@ GitHub blocks Actions from creating pull requests by default. Without this the r
 
 ### If a run fails
 Open the run and read the **Summary** tab first:
-- *Gemini API key was rejected* → create a new key and update the `GEMINI_API_KEY` secret.
-- *Gemini free quota exhausted* → every free model is out of quota; it resets daily and the next run tries again.
+- *NVIDIA NIM request failed (401/403)* → check your NVIDIA API key and update the `NVIDIA_API_KEY` secret.
+- *NVIDIA NIM returned HTTP 429* → the model/account rate limit or quota may be exhausted; check the NVIDIA API Catalog usage details.
 - *Pull request could not be created* → step 3 above. The work is already on the branch `automation/physics-playground-daily`.
 
 You can test changes to the workflow before merging: **Actions → Run workflow → choose the branch**.
@@ -60,4 +60,4 @@ The workflow does not take Gemini's word that it succeeded. After the agent runs
 2. If that fails, Gemini gets **one** repair pass with the real compiler/test errors.
 3. If the final verification still fails, `scripts/discard-agent-work.mjs` throws the changes away, records the failure in `roadmap/progress.json` (3 failures on one concept blocks it), and only the daily log is committed. Broken code is never put in a pull request.
 
-If Gemini itself keeps failing, open `roadmap/daily-log.md` on the `automation/physics-playground-daily` branch: it records Gemini's actual error text.
+If NVIDIA NIM keeps failing, open `roadmap/daily-log.md` on the `automation/physics-playground-daily` branch: it records Gemini's actual error text.
