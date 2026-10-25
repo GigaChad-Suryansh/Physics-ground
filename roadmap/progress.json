@@ -1,29 +1,21 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 4,
+  "last_completed_id": 6,
   "completed_ids": [
     1,
     2,
     3,
-    4
+    4,
+    6
   ],
-  "current_task": "Retry concept 6",
-  "last_run": "2026-10-23T08:38:23.234Z",
-  "last_outcome": "failed_verification",
+  "current_task": "Completed concept 6: Uniformly accelerated motion",
+  "last_run": "2026-10-25T19:07:05.018Z",
+  "last_outcome": "success",
   "known_bugs": [],
-  "blocked_concepts": [
-    {
-      "id": 5,
-      "reason": "3 consecutive failed attempts. Last error: ### build (tsc + vite) failed src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx(627,145): error TS2304: Cannot find name 'a'."
-    }
-  ],
-  "consecutive_failures": 2,
+  "blocked_concepts": [],
+  "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Last run: the agent's changes did not pass build/tests and were discarded by the workflow. Nothing was marked complete.",
-  "last_failure": {
-    "concept_id": 6,
-    "note": "### completion claim rejected concept(s) 6 were marked completed but the working tree has no new simulation page + physics module + route (page: false, physics: false, route: false).",
-    "at": "2026-10-23T08:38:23.234Z"
-  }
+  "notes": "Concept 6 (Uniformly accelerated motion) is integrated (physics module, page, route) and was marked complete by the workflow.",
+  "last_failure": null
 }

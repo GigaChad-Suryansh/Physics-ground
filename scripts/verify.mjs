@@ -13,6 +13,7 @@
  */
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import { slugOf, integrated } from './concept-paths.mjs';
 
 function run(label, cmd, args) {
   const r = spawnSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
@@ -46,19 +47,20 @@ const changed =
     encoding: 'utf8',
   }).stdout || '').trim().length > 0;
 
-// A concept may only be marked complete if it was actually integrated.
+// A concept may only be marked complete if its physics module, page and route really exist.
 function completionClaimProblem() {
   try {
     const before = JSON.parse(spawnSync('git', ['show', 'HEAD:roadmap/progress.json'], { encoding: 'utf8' }).stdout || '{}');
     const after = JSON.parse(fs.readFileSync('roadmap/progress.json', 'utf8'));
     const added = (after.completed_ids || []).filter((id) => !(before.completed_ids || []).includes(id));
     if (added.length === 0) return null;
-    const touched = (spawnSync('git', ['status', '--porcelain', '--', 'src'], { encoding: 'utf8' }).stdout || '').split('\n');
-    const hasPage = touched.some((l) => /src\/simulations\//.test(l));
-    const hasPhysics = touched.some((l) => /src\/physics\//.test(l));
-    const hasRoute = touched.some((l) => /src\/App\.tsx/.test(l));
-    if (!(hasPage && hasPhysics && hasRoute)) {
-      return `### completion claim rejected\nconcept(s) ${added.join(', ')} were marked completed but the working tree has no new simulation page + physics module + route (page: ${hasPage}, physics: ${hasPhysics}, route: ${hasRoute}).`;
+    const concepts = JSON.parse(fs.readFileSync('roadmap/physics-concepts.json', 'utf8')).concepts;
+    const missing = added.filter((id) => {
+      const c = concepts.find((x) => x.id === id);
+      return !c || !integrated(slugOf(c));
+    });
+    if (missing.length) {
+      return `### completion claim rejected\nconcept(s) ${missing.join(', ')} were marked completed but the repository has no complete physics module + page + route for them.`;
     }
   } catch {
     /* unreadable progress is caught by roadmap validation */

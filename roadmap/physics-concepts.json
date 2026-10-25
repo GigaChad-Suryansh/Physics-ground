@@ -76,7 +76,9 @@
         "Displacement is 0 if the path is a closed loop",
         "Distance equals displacement magnitude for unidirectional linear motion"
       ],
-      "dependencies": [1],
+      "dependencies": [
+        1
+      ],
       "notes": "Implementing with interactive path tracing and real-time scalar vs vector comparison."
     },
     {
@@ -115,7 +117,9 @@
         "Average speed equals magnitude of constant velocity for unidirectional linear motion",
         "Instantaneous speed is always the magnitude of the instantaneous velocity vector"
       ],
-      "dependencies": [2],
+      "dependencies": [
+        2
+      ],
       "notes": "Implementing interactive speed vs velocity comparison with vector visualization."
     },
     {
@@ -154,7 +158,9 @@
         "Free fall under gravity g yields velocity increasing at rate g",
         "Uniform circular motion yields constant speed with centripetal acceleration pointing inward"
       ],
-      "dependencies": [3],
+      "dependencies": [
+        3
+      ],
       "notes": "Fully implemented with interactive canvas, acceleration vector visualization, kinematics equations, and test coverage."
     },
     {
@@ -179,7 +185,7 @@
       "title": "Uniformly accelerated motion",
       "category": "Classical Mechanics",
       "difficulty": "introductory",
-      "status": "pending",
+      "status": "completed",
       "simulation_type": "interactive-canvas",
       "learning_objectives": [
         "Apply SUVAT equations to calculate displacement, velocity, and time.",
@@ -210,7 +216,9 @@
         "Final velocity matches v0 + at",
         "Displacement matches v0t + 0.5at^2"
       ],
-      "dependencies": [4],
+      "dependencies": [
+        4
+      ],
       "notes": "Implementing with multiple scenarios and analytical validation."
     },
     {
