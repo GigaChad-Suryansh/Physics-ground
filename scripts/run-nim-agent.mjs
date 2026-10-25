@@ -95,7 +95,9 @@ function cap(value) {
 
 function runCommand(command, args) {
   if (!Array.isArray(args) || args.some((a) => typeof a !== 'string')) throw new Error('args must be an array of strings.');
-  if (args.some((a) => /(^|[/\\\\])\.env(?:[/\\\\]|$)|(^|[/\\\\])\.git(?:[/\\\\]|$)/i.test(a))) throw new Error('Environment and Git internals are not accessible through shell commands.');
+  if (args.some((a) => /^[/\\\\]/.test(a) || /(^|[/\\\\])\\.\\.([/\\\\]|$)/.test(a) || /(^|[/\\\\])\\.env(?:[/\\\\]|$)|(^|[/\\\\])\\.git(?:[/\\\\]|$)|(^|[/\\\\])(proc|etc|home|root|tmp)([/\\\\]|$)/i.test(a))) throw new Error('Paths must stay inside the repository and may not access environment files or system directories.');
+  if (command === 'find' && args.some((a) => ['-exec', '-execdir', '-delete', '-ok', '-okdir', '-fprint', '-fprintf'].includes(a))) throw new Error('find execution and mutation flags are not allowed.');
+  if (command === 'find' && !['src', 'roadmap'].includes(args[0])) throw new Error('find is limited to src/ and roadmap/.');
   const first = args[0] || '';
   if (command === 'git' && !['status', 'diff'].includes(first)) throw new Error('Only git status and git diff are allowed.');
   if (command === 'npm' && ![['test'], ['run', 'build'], ['run', 'dev'], ['run', 'preview']].some((allowed) => allowed.every((x, i) => args[i] === x))) {
