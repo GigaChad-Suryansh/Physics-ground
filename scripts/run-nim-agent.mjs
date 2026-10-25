@@ -152,6 +152,8 @@ async function api(messages) {
       tools: toolDefinitions,
       tool_choice: 'auto',
       temperature: 0.2,
+      reasoning_effort: 'low',
+      chat_template_kwargs: { clear_thinking: true },
       max_tokens: 4096,
       stream: false,
     }),
