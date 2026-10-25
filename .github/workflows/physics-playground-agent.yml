@@ -80,7 +80,7 @@ jobs:
       - name: Run Gemini CLI developer
         id: gemini
         continue-on-error: true
-        if: steps.pick.outcome == 'success'
+        if: steps.pick.outcome == 'success' && steps.brief.outputs.phase != '3'
         uses: google-github-actions/run-gemini-cli@v0
         env:
           GEMINI_CLI_TRUST_WORKSPACE: "true"
@@ -97,7 +97,7 @@ jobs:
             ${{ steps.brief.outputs.prompt }}
           settings: |
             {
-              "model": { "maxSessionTurns": 30 },
+              "model": { "maxSessionTurns": 20 },
               "tools": {
                 "core": ["run_shell_command", "read_file", "write_file", "replace"],
                 "allowed": [
@@ -115,7 +115,7 @@ jobs:
       # next working model once (it continues from whatever is on disk).
       - name: Retry Gemini CLI developer with fallback model
         id: gemini_retry
-        if: always() && steps.gemini.outcome == 'failure' && steps.pick.outputs.fallback_model != ''
+        if: always() && steps.gemini.outcome == 'failure' && steps.pick.outputs.fallback_model != '' && steps.brief.outputs.phase != '3'
         uses: google-github-actions/run-gemini-cli@v0
         env:
           GEMINI_CLI_TRUST_WORKSPACE: "true"
@@ -133,7 +133,7 @@ jobs:
             ${{ steps.brief.outputs.prompt }}
           settings: |
             {
-              "model": { "maxSessionTurns": 30 },
+              "model": { "maxSessionTurns": 20 },
               "tools": {
                 "core": ["run_shell_command", "read_file", "write_file", "replace"],
                 "allowed": [
@@ -153,7 +153,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          git checkout -- .github scripts GEMINI.md 2>/dev/null || true
+          git checkout -- .github scripts GEMINI.md roadmap/physics-concepts.json roadmap/progress.json 2>/dev/null || true
           git clean -fdq -- .github scripts 2>/dev/null || true
 
       # The agent's own report is never trusted: run the real build and tests.
@@ -167,7 +167,7 @@ jobs:
       # One repair attempt, fed the real compiler/test errors.
       - name: Repair failed checks with Gemini
         id: repair
-        if: always() && steps.verify1.outputs.ok == 'false' && steps.verify1.outputs.changed == 'true' && steps.pick.outcome == 'success'
+        if: always() && steps.verify1.outputs.ok == 'false' && steps.verify1.outputs.changed == 'true' && steps.pick.outcome == 'success' && steps.brief.outputs.phase != '3'
         uses: google-github-actions/run-gemini-cli@v0
         env:
           GEMINI_CLI_TRUST_WORKSPACE: "true"
@@ -189,7 +189,7 @@ jobs:
             ${{ steps.brief.outputs.prompt }}
           settings: |
             {
-              "model": { "maxSessionTurns": 30 },
+              "model": { "maxSessionTurns": 20 },
               "tools": {
                 "core": ["run_shell_command", "read_file", "write_file", "replace"],
                 "allowed": [
@@ -207,8 +207,16 @@ jobs:
         if: always()
         shell: bash
         run: |
-          git checkout -- .github scripts GEMINI.md 2>/dev/null || true
+          git checkout -- .github scripts GEMINI.md roadmap/physics-concepts.json roadmap/progress.json 2>/dev/null || true
           git clean -fdq -- .github scripts 2>/dev/null || true
+
+      # Step 3 of a concept is pure bookkeeping, done by a script (no AI, no quota).
+      - name: Mark the concept complete (step 3)
+        id: finalize
+        if: always() && steps.brief.outputs.phase == '3'
+        env:
+          CONCEPT_ID: ${{ steps.brief.outputs.concept_id }}
+        run: node scripts/finalize-concept.mjs
 
       - name: Final verification
         id: verify
@@ -216,6 +224,15 @@ jobs:
         env:
           VERIFY_LABEL: final
         run: node scripts/verify.mjs
+
+      # Record a verified step 1/2 (the agent never edits roadmap files itself).
+      - name: Record verified progress
+        id: advance
+        if: always() && steps.verify.outputs.ok == 'true' && steps.verify.outputs.changed == 'true' && (steps.brief.outputs.phase == '1' || steps.brief.outputs.phase == '2')
+        env:
+          CONCEPT_ID: ${{ steps.brief.outputs.concept_id }}
+          PHASE: ${{ steps.brief.outputs.phase }}
+        run: node scripts/advance-progress.mjs
 
       # Never ship work that does not build: drop it and record the failure.
       - name: Discard unverified agent work
@@ -364,14 +381,17 @@ jobs:
           MERGED: ${{ steps.automerge.outcome == 'success' }}
           DISCARDED: ${{ steps.discard.outcome == 'success' }}
           CONCEPT_ID: ${{ steps.brief.outputs.concept_id }}
+          PHASE: ${{ steps.brief.outputs.phase }}
+          FINALIZED: ${{ steps.finalize.outcome == 'success' }}
         continue-on-error: true
         run: |
-          if [ "$PICK_OK" != "true" ]; then icon="⏸️"; msg="No Gemini model was available (most likely the free daily quota). Nothing changed; it will try again next run."
+          [ "$PHASE" = "3" ] && GEMINI_OK=true
+          if [ "$PICK_OK" != "true" ] && [ "$PHASE" != "3" ]; then icon="⏸️"; msg="No Gemini model was available (most likely the free daily quota). Nothing changed; it will try again next run."
           elif [ "$BRIEF_OK" != "true" ]; then icon="❌"; msg="The workflow could not prepare today's task for Gemini (an internal error, not Gemini). Nothing changed. See the run details."
           elif [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="Gemini's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged; the failure note was saved so the next run can learn from it."
           elif [ "$GEMINI_OK" != "true" ]; then icon="❌"; msg="Gemini failed on every attempt. Nothing changed."
           elif [ "$VERIFIED" = "true" ] && [ "$CHANGED" != "true" ]; then icon="ℹ️"; msg="Run finished with no code changes."
-          elif [ "$MERGED" = "true" ]; then icon="✅"; msg="Concept ${CONCEPT_ID} (or a fix) was built, verified, merged and deployed."
+          elif [ "$MERGED" = "true" ]; then icon="✅"; msg="Concept ${CONCEPT_ID}: $( [ "$FINALIZED" = "true" ] && echo "marked complete (step 3 of 3)" || echo "step ${PHASE} of 3 built, verified, merged and deployed" )."
           else icon="👀"; msg="Work is verified but was not auto-merged. Please review the open pull request."
           fi
           body="@${OWNER} ${icon} **$(date -u +%Y-%m-%d)** — ${msg}"$'\n\n'"[Run details](${RUN_URL})"
