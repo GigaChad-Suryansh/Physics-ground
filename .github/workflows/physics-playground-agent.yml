@@ -2,7 +2,7 @@ name: Physics Playground Autonomous Developer
 
 on:
   # No GitHub "schedule" on purpose: GitHub's timer starts hours late. The daily start comes from
-  # cron-job.org (13:45 IST, before the daily NIM run) calling this
+  # cron-job.org (13:45 IST, after Gemini's free quota resets at 12:30 IST) calling this
   # workflow_dispatch endpoint. Run by hand: Actions > Run workflow.
   workflow_dispatch:
 
@@ -59,13 +59,14 @@ jobs:
           echo "test_exit=$test_exit" >> "$GITHUB_OUTPUT"
           echo "build_exit=$build_exit" >> "$GITHUB_OUTPUT"
 
-      # Verify the configured NVIDIA-hosted model before the agent starts.
-      - name: Select a working NVIDIA NIM model
+      # Checks the API key and finds a model that really has free quota *before*
+      # the agent starts, so a quota/key problem fails fast with a clear message.
+      - name: Select a working Gemini model
         id: pick
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-          NVIDIA_MODEL: ${{ vars.NVIDIA_MODEL }}
-        run: node scripts/pick-nim-model.mjs
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+        run: node scripts/pick-gemini-model.mjs
 
       # Deterministic work (which concept is next, which files exist, what the
       # baseline says) is done here, so the agent spends its few turns building.
@@ -76,35 +77,75 @@ jobs:
           BUILD_EXIT: ${{ steps.baseline.outputs.build_exit }}
         run: node scripts/agent-brief.mjs
 
-      - name: Run NVIDIA NIM developer
+      - name: Run Gemini CLI developer
         id: gemini
         continue-on-error: true
         if: steps.pick.outcome == 'success'
+        uses: google-github-actions/run-gemini-cli@v0
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-          NVIDIA_MODEL: ${{ steps.pick.outputs.model }}
-          NIM_AGENT_PROMPT: |
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ steps.pick.outputs.model }}
+          upload_artifacts: true
+          gemini_debug: false
+          prompt: |
             You are the repository's autonomous physics-simulation developer. Follow GEMINI.md and the brief below exactly.
             Never claim deployment; never add concept 101; never weaken tests. Do not commit, push, create branches, or open PRs; the workflow makes the PR.
 
             ${{ steps.brief.outputs.prompt }}
-        run: node scripts/run-nim-agent.mjs
+          settings: |
+            {
+              "model": { "maxSessionTurns": 30 },
+              "tools": {
+                "core": ["run_shell_command", "read_file", "write_file", "replace"],
+                "allowed": [
+                  "read_file", "write_file", "replace",
+                  "run_shell_command(npm)", "run_shell_command(node)", "run_shell_command(npx)",
+                  "run_shell_command(ls)", "run_shell_command(cat)", "run_shell_command(head)",
+                  "run_shell_command(tail)", "run_shell_command(grep)", "run_shell_command(find)",
+                  "run_shell_command(wc)", "run_shell_command(git status)", "run_shell_command(git diff)"
+                ]
+              },
+              "telemetry": { "enabled": false }
+            }
 
-      # Retry once with the same configured NIM model if the first request fails.
-      - name: Retry NVIDIA NIM developer
+      # Free-tier quota is per model. If the first attempt failed, try the
+      # next working model once (it continues from whatever is on disk).
+      - name: Retry Gemini CLI developer with fallback model
         id: gemini_retry
-        if: always() && steps.gemini.outcome == 'failure' && steps.pick.outcome == 'success'
-        continue-on-error: true
+        if: always() && steps.gemini.outcome == 'failure' && steps.pick.outputs.fallback_model != ''
+        uses: google-github-actions/run-gemini-cli@v0
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-          NVIDIA_MODEL: ${{ steps.pick.outputs.model }}
-          NIM_AGENT_PROMPT: |
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ steps.pick.outputs.fallback_model }}
+          upload_artifacts: true
+          gemini_debug: false
+          prompt: |
             You are the repository's autonomous physics-simulation developer. Follow GEMINI.md and the brief below exactly.
-            A previous attempt in this run failed. Run git status --short first and continue from the current working tree; do not start over.
             Never claim deployment; never add concept 101; never weaken tests. Do not commit, push, create branches, or open PRs; the workflow makes the PR.
+            NOTE: an earlier attempt in this run failed part-way. Run `git status --short` first and continue from what is already on disk rather than starting over.
 
             ${{ steps.brief.outputs.prompt }}
-        run: node scripts/run-nim-agent.mjs
+          settings: |
+            {
+              "model": { "maxSessionTurns": 30 },
+              "tools": {
+                "core": ["run_shell_command", "read_file", "write_file", "replace"],
+                "allowed": [
+                  "read_file", "write_file", "replace",
+                  "run_shell_command(npm)", "run_shell_command(node)", "run_shell_command(npx)",
+                  "run_shell_command(ls)", "run_shell_command(cat)", "run_shell_command(head)",
+                  "run_shell_command(tail)", "run_shell_command(grep)", "run_shell_command(find)",
+                  "run_shell_command(wc)", "run_shell_command(git status)", "run_shell_command(git diff)"
+                ]
+              },
+              "telemetry": { "enabled": false }
+            }
 
       # The agent must not change its own automation. (The default token also
       # cannot push workflow-file edits, which would make the PR step fail.)
@@ -124,24 +165,43 @@ jobs:
         run: node scripts/verify.mjs
 
       # One repair attempt, fed the real compiler/test errors.
-      - name: Repair failed checks with NVIDIA NIM
+      - name: Repair failed checks with Gemini
         id: repair
         if: always() && steps.verify1.outputs.ok == 'false' && steps.verify1.outputs.changed == 'true' && steps.pick.outcome == 'success'
-        continue-on-error: true
+        uses: google-github-actions/run-gemini-cli@v0
         env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-          NVIDIA_MODEL: ${{ steps.pick.outputs.model }}
-          NIM_AGENT_PROMPT: |
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ steps.pick.outputs.fallback_model || steps.pick.outputs.model }}
+          upload_artifacts: true
+          gemini_debug: false
+          prompt: |
             You are the repository's autonomous physics-simulation developer. Follow GEMINI.md.
             The work currently in the working tree FAILS the build/tests. Fix ONLY these errors; do not add features, do not delete or weaken tests.
-            Use the exact component prop names from the API reference in the brief below. After editing, run npx tsc --noEmit and npm test until both pass.
+            Use the exact component prop names from the API reference in the brief below. After editing, run `npx tsc --noEmit` and `npm test` until both pass.
             Do not commit, push, or touch .github/, scripts/, or GEMINI.md.
 
             ## Errors to fix
             ${{ steps.verify1.outputs.errors }}
 
             ${{ steps.brief.outputs.prompt }}
-        run: node scripts/run-nim-agent.mjs
+          settings: |
+            {
+              "model": { "maxSessionTurns": 30 },
+              "tools": {
+                "core": ["run_shell_command", "read_file", "write_file", "replace"],
+                "allowed": [
+                  "read_file", "write_file", "replace",
+                  "run_shell_command(npm)", "run_shell_command(node)", "run_shell_command(npx)",
+                  "run_shell_command(ls)", "run_shell_command(cat)", "run_shell_command(head)",
+                  "run_shell_command(tail)", "run_shell_command(grep)", "run_shell_command(find)",
+                  "run_shell_command(wc)", "run_shell_command(git status)", "run_shell_command(git diff)"
+                ]
+              },
+              "telemetry": { "enabled": false }
+            }
 
       - name: Revert protected files again
         if: always()
@@ -170,13 +230,15 @@ jobs:
         if: always()
         shell: bash
         env:
-          NIM_OUTCOME: ${{ steps.gemini_retry.outcome == 'success' && 'success (retry)' || (steps.pick.outcome != 'success' && 'skipped (no working model - see pre-flight summary)') || steps.gemini.outcome }}
-          NIM_MODEL_USED: ${{ steps.pick.outputs.model }}
+          GEMINI_OUTCOME: ${{ steps.gemini_retry.outcome == 'success' && 'success (fallback model)' || (steps.pick.outcome != 'success' && 'skipped (no working model - see pre-flight summary)') || steps.gemini.outcome }}
+          GEMINI_MODEL_USED: ${{ steps.gemini_retry.outcome == 'success' && steps.pick.outputs.fallback_model || steps.pick.outputs.model }}
           BASELINE_TEST_EXIT: ${{ steps.baseline.outputs.test_exit }}
           BASELINE_BUILD_EXIT: ${{ steps.baseline.outputs.build_exit }}
           VERIFY_OK: ${{ steps.verify.outputs.ok }}
           REPAIR_OUTCOME: ${{ steps.repair.outcome }}
           DISCARDED_FILES: ${{ steps.discard.outputs.discarded_files }}
+          GEMINI_ERROR: ${{ steps.gemini.outputs.error || steps.gemini_retry.outputs.error }}
+          GEMINI_SUMMARY: ${{ steps.gemini.outputs.summary }}
         run: |
           set -euo pipefail
           mkdir -p roadmap
@@ -194,14 +256,20 @@ jobs:
             printf '## Day %s — %s\n\n' "$day_number" "$date_utc"
             printf -- '- **Workflow run:** [#%s](https://github.com/%s/actions/runs/%s)\n' "$GITHUB_RUN_NUMBER" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
             printf -- '- **Trigger:** %s\n' "$GITHUB_EVENT_NAME"
-            printf -- '- **NVIDIA NIM status:** %s\n' "$NIM_OUTCOME"
-            printf -- '- **NVIDIA NIM model:** %s\n' "${NIM_MODEL_USED:-none}"
+            printf -- '- **Gemini status:** %s\n' "$GEMINI_OUTCOME"
+            printf -- '- **Gemini model:** %s\n' "${GEMINI_MODEL_USED:-none}"
             printf -- '- **Baseline tests exit code:** %s (0 = passed)\n' "$BASELINE_TEST_EXIT"
             printf -- '- **Baseline build exit code:** %s (0 = passed)\n' "$BASELINE_BUILD_EXIT"
             printf -- '- **Independent verification (build + tests):** %s\n' "$([ "$VERIFY_OK" = "true" ] && echo passed || echo FAILED)"
             printf -- '- **Repair attempt:** %s\n' "${REPAIR_OUTCOME:-skipped}"
             if [ -n "${DISCARDED_FILES:-}" ]; then
               printf -- '- **Agent work discarded (did not build/pass tests):** %s\n' "$DISCARDED_FILES"
+            fi
+            if [ -n "${GEMINI_ERROR:-}" ]; then
+              printf -- '- **Gemini error output:** %s\n' "$(printf '%s' "$GEMINI_ERROR" | tr '\n' ' ' | tail -c 1800)"
+            fi
+            if [ -n "${GEMINI_SUMMARY:-}" ]; then
+              printf -- '- **Gemini summary:** %s\n' "$(printf '%s' "$GEMINI_SUMMARY" | tr '\n' ' ' | cut -c1-800)"
             fi
             printf -- '- **Changes present after verification:**\n'
             changed_files=$(git status --short | sed '/roadmap\/daily-log\.md/d' || true)
@@ -246,7 +314,7 @@ jobs:
           title: "chore: autonomous Physics Playground maintenance and run log"
           commit-message: "chore: autonomous Physics Playground maintenance and run log"
           body: |
-            Automated proposal from the daily NVIDIA NIM developer workflow.
+            Automated proposal from the daily Gemini developer workflow.
 
             - Existing bugs and failing checks must be handled before roadmap features.
             - The fixed roadmap has exactly 100 concepts.
@@ -288,7 +356,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          NIM_OK: ${{ steps.gemini.outcome == 'success' || steps.gemini_retry.outcome == 'success' }}
+          GEMINI_OK: ${{ steps.gemini.outcome == 'success' || steps.gemini_retry.outcome == 'success' }}
           PICK_OK: ${{ steps.pick.outcome == 'success' }}
           BRIEF_OK: ${{ steps.brief.outcome == 'success' }}
           VERIFIED: ${{ steps.verify.outputs.ok }}
@@ -298,10 +366,10 @@ jobs:
           CONCEPT_ID: ${{ steps.brief.outputs.concept_id }}
         continue-on-error: true
         run: |
-          if [ "$PICK_OK" != "true" ]; then icon="⏸️"; msg="The configured NVIDIA NIM model was unavailable or the API key was rejected. Nothing changed; see the pre-flight summary."
-          elif [ "$BRIEF_OK" != "true" ]; then icon="❌"; msg="The workflow could not prepare today's task for NVIDIA NIM (an internal workflow error, not NVIDIA NIM). Nothing changed. See the run details."
-          elif [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="NVIDIA NIM's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged; the failure note was saved so the next run can learn from it."
-          elif [ "$NIM_OK" != "true" ]; then icon="❌"; msg="NVIDIA NIM failed on every attempt. Nothing changed."
+          if [ "$PICK_OK" != "true" ]; then icon="⏸️"; msg="No Gemini model was available (most likely the free daily quota). Nothing changed; it will try again next run."
+          elif [ "$BRIEF_OK" != "true" ]; then icon="❌"; msg="The workflow could not prepare today's task for Gemini (an internal error, not Gemini). Nothing changed. See the run details."
+          elif [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="Gemini's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged; the failure note was saved so the next run can learn from it."
+          elif [ "$GEMINI_OK" != "true" ]; then icon="❌"; msg="Gemini failed on every attempt. Nothing changed."
           elif [ "$VERIFIED" = "true" ] && [ "$CHANGED" != "true" ]; then icon="ℹ️"; msg="Run finished with no code changes."
           elif [ "$MERGED" = "true" ]; then icon="✅"; msg="Concept ${CONCEPT_ID} (or a fix) was built, verified, merged and deployed."
           else icon="👀"; msg="Work is verified but was not auto-merged. Please review the open pull request."
@@ -329,10 +397,10 @@ jobs:
           echo "::error title=Enable PR creation::Settings > Actions > General > Workflow permissions > tick 'Allow GitHub Actions to create and approve pull requests'. The branch automation/physics-playground-daily already has the changes."
           exit 1
 
-      # The first attempt is allowed to fail; a retry with the same configured model may recover.
+      # The first attempt is allowed to fail (the fallback model may recover).
       # The run is only red if no attempt produced a result.
-      - name: Fail if no NVIDIA NIM attempt succeeded
+      - name: Fail if no Gemini attempt succeeded
         if: always() && steps.gemini.outcome == 'failure' && steps.gemini_retry.outcome != 'success'
         run: |
-          echo "::error::NVIDIA NIM failed on every attempt. See roadmap/daily-log.md on the automation branch."
+          echo "::error::Gemini failed on every attempt. See roadmap/daily-log.md on the automation branch."
           exit 1
