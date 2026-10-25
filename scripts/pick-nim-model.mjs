@@ -41,6 +41,8 @@ async function main() {
         messages: [{ role: 'user', content: 'Reply with the single word OK.' }],
         max_tokens: 16,
         temperature: 0,
+        reasoning_effort: 'low',
+        chat_template_kwargs: { clear_thinking: true },
         stream: false,
       }),
       signal: AbortSignal.timeout(TIMEOUT_MS),
