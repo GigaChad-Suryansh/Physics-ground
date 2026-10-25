@@ -77,7 +77,7 @@ function output(name, value) {
 }
 function safePath(input) {
   if (typeof input !== 'string' || !input.trim()) throw new Error('Path must be a non-empty string.');
-  const normalized = path.posix.normalize(input.replaceAll('\\\\', '/')).replace(/^\.\//, '');
+  const normalized = path.posix.normalize(input.replaceAll('\\', '/')).replace(/^\.\//, '');
   if (normalized === '..' || normalized.startsWith('../') || path.posix.isAbsolute(normalized)) throw new Error('Path must stay inside the repository.');
   if (normalized.split('/').some((part) => part === '.git' || part === 'node_modules' || part.startsWith('.env'))) throw new Error('This path is not available to the agent.');
   return normalized;
@@ -95,6 +95,7 @@ function cap(value) {
 
 function runCommand(command, args) {
   if (!Array.isArray(args) || args.some((a) => typeof a !== 'string')) throw new Error('args must be an array of strings.');
+  if (args.some((a) => /(^|[/\\\\])\.env(?:[/\\\\]|$)|(^|[/\\\\])\.git(?:[/\\\\]|$)/i.test(a))) throw new Error('Environment and Git internals are not accessible through shell commands.');
   const first = args[0] || '';
   if (command === 'git' && !['status', 'diff'].includes(first)) throw new Error('Only git status and git diff are allowed.');
   if (command === 'npm' && ![['test'], ['run', 'build'], ['run', 'dev'], ['run', 'preview']].some((allowed) => allowed.every((x, i) => args[i] === x))) {
@@ -186,7 +187,7 @@ async function main() {
 
   for (let step = 1; step <= MAX_STEPS; step++) {
     const message = await api(messages);
-    messages.push(message);
+    messages.push({ role: 'assistant', content: message.content ?? null, ...(Array.isArray(message.tool_calls) ? { tool_calls: message.tool_calls } : {}) });
     const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
     if (!calls.length) {
       const finalText = String(message.content || '').trim() || 'The model returned no final summary.';
