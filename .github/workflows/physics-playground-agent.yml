@@ -298,7 +298,7 @@ jobs:
           CONCEPT_ID: ${{ steps.brief.outputs.concept_id }}
         continue-on-error: true
         run: |
-          if [ "$PICK_OK" != "true" ]; then icon="⏸️"; msg="No NVIDIA NIM model was available (most likely the free daily quota). Nothing changed; it will try again next run."
+          if [ "$PICK_OK" != "true" ]; then icon="⏸️"; msg="The configured NVIDIA NIM model was unavailable or the API key was rejected. Nothing changed; see the pre-flight summary."
           elif [ "$BRIEF_OK" != "true" ]; then icon="❌"; msg="The workflow could not prepare today's task for NVIDIA NIM (an internal workflow error, not NVIDIA NIM). Nothing changed. See the run details."
           elif [ "$DISCARDED" = "true" ]; then icon="⚠️"; msg="NVIDIA NIM's work for concept ${CONCEPT_ID} failed the build/tests and was discarded. Nothing broken was merged; the failure note was saved so the next run can learn from it."
           elif [ "$NIM_OK" != "true" ]; then icon="❌"; msg="NVIDIA NIM failed on every attempt. Nothing changed."
@@ -329,7 +329,7 @@ jobs:
           echo "::error title=Enable PR creation::Settings > Actions > General > Workflow permissions > tick 'Allow GitHub Actions to create and approve pull requests'. The branch automation/physics-playground-daily already has the changes."
           exit 1
 
-      # The first attempt is allowed to fail (the fallback model may recover).
+      # The first attempt is allowed to fail; a retry with the same configured model may recover.
       # The run is only red if no attempt produced a result.
       - name: Fail if no NVIDIA NIM attempt succeeded
         if: always() && steps.gemini.outcome == 'failure' && steps.gemini_retry.outcome != 'success'
