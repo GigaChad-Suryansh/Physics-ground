@@ -135,6 +135,17 @@ export const SIMULATION_MODULES = [
     description: 'SUVAT equations in action: constant acceleration along horizontal tracks, free fall, and inclined ramps with friction.',
     badge: 'Introductory',
   },
+  {
+    id: 'uniform-linear-motion',
+    name: 'Uniform Linear Motion',
+    category: 'Classical Mechanics',
+    path: '/sim/uniform-linear-motion',
+    icon: Gauge,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: 'Constant velocity motion along a straight path with zero acceleration.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {

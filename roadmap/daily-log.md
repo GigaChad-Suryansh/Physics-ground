@@ -486,3 +486,31 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 20 — 2026-10-26
+
+- **Workflow run:** [#26](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/40292711184)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3.6-flash
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Gemini error output:** Warning: 256-color support not detected. Using a terminal with at least 256-color support is recommended for a better visual experience. Warning: --allowed-tools cli argument and tools.allowed in settings.json are deprecated and will be removed in 1.0: Migrate to Policy Engine: https://geminicli.com/docs/core/policy-engine/ YOLO mode is enabled. All tool calls will be automatically approved. YOLO mode is enabled. All tool calls will be automatically approved. Ripgrep is not available. Falling back to GrepTool. Attempt 1 failed: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit.  * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits. Please retry in 32.07503061s. Suggested retry after 32s.. Retrying after 36016ms... (node:2642) MaxListenersExceededWarning: Possible EventTarget memory leak detected. 11 abort listeners added to [AbortSignal]. MaxListeners is 10. Use events.setMaxListeners() to increase limit (Use `node --trace-warnings ...` to show where the warning was created)
+- **Gemini summary:** Completed STEP 2 for Concept 5 "Uniform linear motion":  1. Created `src/simulations/uniform-linear-motion/UniformLinearMotionPage.tsx`:    - Interactive canvas visualizer rendering straight-line trajectories, initial position indicator, displacement vector, and scaled velocity vector arrow.    - Sliders for $x_0$, $y_0$, $v_x$, and $v_y$.    - Readout bar and telemetry chart tracking position and distance over time.    - LaTeX mathematical formula card and theoretical explanations. 2. Registered route `/sim/uniform-linear-motion` in `src/App.tsx`. 3. Appended the simulation entry to `SIMULATION_MODULES` in `src/components/layout/Sidebar.tsx`. 4. Verified with TypeScript type check (`npx tsc --noEmit`), unit test runner (`npm test`), and production build (`npm run build`). All passed with 
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - ` M src/App.tsx`
+  - ` M src/components/layout/Sidebar.tsx`
+  - `?? src/simulations/uniform-linear-motion/`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-10-26T08:33:40.835Z
+  - **Current task:** Concept 5: simulation page + registration done and verified
+  - **Last completed concept ID:** 6
+  - **Completed concepts:** 5
+  - **Notes:** Concept 5: simulation page + registration was built and verified. The next run continues from the files on disk.
+
+---
+
