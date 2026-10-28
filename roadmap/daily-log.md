@@ -538,3 +538,30 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 22 — 2026-10-28
+
+- **Workflow run:** [#28](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/40657257914)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3.6-flash
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Gemini error output:** Warning: 256-color support not detected. Using a terminal with at least 256-color support is recommended for a better visual experience. Warning: --allowed-tools cli argument and tools.allowed in settings.json are deprecated and will be removed in 1.0: Migrate to Policy Engine: https://geminicli.com/docs/core/policy-engine/ YOLO mode is enabled. All tool calls will be automatically approved. YOLO mode is enabled. All tool calls will be automatically approved. Ripgrep is not available. Falling back to GrepTool. Error executing tool run_shell_command: Tool execution denied by policy. Error executing tool run_shell_command: Tool execution denied by policy.
+- **Gemini summary:** I have completed STEP 1 for Concept 7 ("Motion graphs"):  1. **Created `src/physics/mechanics/motion-graphs.ts`**: Pure TypeScript physics module defining parameters, motion profile types (`uniform`, `constant-acceleration`, `harmonic`), exported default parameters `DEFAULT_MOTION_GRAPH_PARAMS`, analytical state computation `getMotionGraphState`, displacement calculation `calculateDisplacement`, velocity change `calculateVelocityChange`, and sample data generator `generateMotionGraphData`. Equations and assumptions are documented in the header comments. 2. **Created `src/tests/motion-graphs.test.ts`**: Unit tests verifying calculations for uniform motion, constant acceleration motion, simple harmonic motion, displacement/velocity change over intervals, and graph data generation using Vites
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - `?? src/physics/mechanics/motion-graphs.ts`
+  - `?? src/tests/motion-graphs.test.ts`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-10-28T08:32:15.936Z
+  - **Current task:** Concept 7: physics module + tests done and verified
+  - **Last completed concept ID:** 6
+  - **Completed concepts:** 6
+  - **Notes:** Concept 7: physics module + tests was built and verified. The next run continues from the files on disk.
+
+---
+
