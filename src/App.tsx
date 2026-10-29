@@ -8,6 +8,7 @@ import { SpeedVelocityPage } from './simulations/speed-velocity/SpeedVelocityPag
 import { UniformLinearMotionPage } from './simulations/uniform-linear-motion/UniformLinearMotionPage';
 import { AccelerationPage } from './simulations/acceleration/AccelerationPage';
 import { UniformlyAcceleratedMotionPage } from './simulations/uniformly-accelerated-motion/UniformlyAcceleratedMotionPage';
+import { MotionGraphsPage } from './simulations/motion-graphs/MotionGraphsPage';
 import { ForcesPage } from './simulations/forces/ForcesPage';
 import { OrbitalPage } from './simulations/orbital/OrbitalPage';
 import { WavesPage } from './simulations/waves/WavesPage';
@@ -25,6 +26,7 @@ export const App: React.FC = () => {
         <Route path="/sim/uniform-linear-motion" element={<UniformLinearMotionPage />} />
         <Route path="/sim/acceleration" element={<AccelerationPage />} />
         <Route path="/sim/uniformly-accelerated-motion" element={<UniformlyAcceleratedMotionPage />} />
+        <Route path="/sim/motion-graphs" element={<MotionGraphsPage />} />
         <Route path="/sim/projectile" element={<ProjectileMotionPage />} />
         <Route path="/sim/forces" element={<ForcesPage />} />
         <Route path="/sim/orbital" element={<OrbitalPage />} />

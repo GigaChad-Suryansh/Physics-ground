@@ -146,6 +146,17 @@ export const SIMULATION_MODULES = [
     description: 'Constant velocity motion along a straight path with zero acceleration.',
     badge: 'Introductory',
   },
+  {
+    id: 'motion-graphs',
+    name: 'Motion Graphs',
+    category: 'Classical Mechanics',
+    path: '/sim/motion-graphs',
+    icon: Activity,
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    description: 'Kinematic motion graphs (position, velocity, acceleration vs. time) and their geometric relationships.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
