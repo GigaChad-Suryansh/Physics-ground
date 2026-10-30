@@ -1,22 +1,23 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 6,
+  "last_completed_id": 7,
   "completed_ids": [
     1,
     2,
     3,
     4,
     5,
-    6
+    6,
+    7
   ],
-  "current_task": "Concept 7: simulation page + registration done and verified",
-  "last_run": "2026-10-29T08:33:24.525Z",
+  "current_task": "Completed concept 7: Motion graphs",
+  "last_run": "2026-10-30T08:30:50.266Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 7: simulation page + registration was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 7 (Motion graphs) is integrated (physics module, page, route) and was marked complete by the workflow.",
   "last_failure": null
 }
