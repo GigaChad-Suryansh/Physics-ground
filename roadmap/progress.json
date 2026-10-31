@@ -10,14 +10,14 @@
     6,
     7
   ],
-  "current_task": "Completed concept 7: Motion graphs",
-  "last_run": "2026-10-30T08:30:50.266Z",
+  "current_task": "Concept 8: physics module + tests done and verified",
+  "last_run": "2026-10-31T08:32:29.521Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 7 (Motion graphs) is integrated (physics module, page, route) and was marked complete by the workflow.",
+  "notes": "Concept 8: physics module + tests was built and verified. The next run continues from the files on disk.",
   "last_failure": null
 }

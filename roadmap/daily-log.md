@@ -617,3 +617,30 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 25 — 2026-10-31
+
+- **Workflow run:** [#31](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/41184864744)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3.6-flash
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Gemini error output:**  Retrying with backoff... _ApiError: {"error":{"message":"{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n","code":503,"status":"Service Unavailable"}}     at throwErrorIfNotOK (file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:267922:24)     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)     at async file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:267685:7     at async Models.generateContentStream (file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:268781:16)     at async file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:312891:19     at async file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:289124:23     at async retryWithBackoff (file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:309277:23)     at async GeminiChat.makeApiCallAndProcessStream (file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:334390:28)     at async GeminiChat.streamWithRetries (file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:334085:29)     at async Turn.run (file:///opt/hostedtoolcache/node/20.20.2/x64/lib/node_modules/@google/gemini-cli/bundle/chunk-RZ3ZVTZB.js:335129:24) {   status: 503 } Error executing tool run_shell_command: Tool execution denied by policy.
+- **Gemini summary:** I have completed STEP 1 for Concept 8 ("Projectile motion"):  1. **Physics Model (`src/physics/mechanics/projectile-motion.ts`)**:    - Implemented `ProjectileParams`, `ProjectileState`, and `AnalyticalSummary` interface types along with `DEFAULT_PROJECTILE_PARAMS`.    - Added `getProjectileState(t, params)` and `calculateAnalyticalSummary(params)` computing trajectory, instantaneous velocity/speed, peak height, time of flight, and horizontal range.    - Included full documentation of governing equations and assumptions.  2. **Tests (`src/tests/projectile-motion.test.ts`)**:    - Created unit test suite with 5 test cases comparing outputs against analytical closed-form solutions (initial conditions, zero vertical velocity at peak, 45° trajectory, horizontal launch, and pure vertical launc
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - `?? src/physics/mechanics/projectile-motion.ts`
+  - `?? src/tests/projectile-motion.test.ts`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-10-31T08:32:29.521Z
+  - **Current task:** Concept 8: physics module + tests done and verified
+  - **Last completed concept ID:** 7
+  - **Completed concepts:** 7
+  - **Notes:** Concept 8: physics module + tests was built and verified. The next run continues from the files on disk.
+
+---
+
