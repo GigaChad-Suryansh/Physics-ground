@@ -1,7 +1,8 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
-import { ProjectileMotionPage } from './simulations/projectile/ProjectileMotionPage';
+import { ProjectileMotionPage as LegacyProjectilePage } from './simulations/projectile/ProjectileMotionPage';
+import { ProjectileMotionPage } from './simulations/projectile-motion/ProjectileMotionPage';
 import { PositionDisplacementPage } from './simulations/position-displacement/PositionDisplacementPage';
 import { DistanceDisplacementPage } from './simulations/distance-versus-displacement/DistanceDisplacementPage';
 import { SpeedVelocityPage } from './simulations/speed-velocity/SpeedVelocityPage';
@@ -27,7 +28,8 @@ export const App: React.FC = () => {
         <Route path="/sim/acceleration" element={<AccelerationPage />} />
         <Route path="/sim/uniformly-accelerated-motion" element={<UniformlyAcceleratedMotionPage />} />
         <Route path="/sim/motion-graphs" element={<MotionGraphsPage />} />
-        <Route path="/sim/projectile" element={<ProjectileMotionPage />} />
+        <Route path="/sim/projectile" element={<LegacyProjectilePage />} />
+        <Route path="/sim/projectile-motion" element={<ProjectileMotionPage />} />
         <Route path="/sim/forces" element={<ForcesPage />} />
         <Route path="/sim/orbital" element={<OrbitalPage />} />
         <Route path="/sim/waves" element={<WavesPage />} />
