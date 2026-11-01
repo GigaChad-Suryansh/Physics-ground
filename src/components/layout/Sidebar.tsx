@@ -157,6 +157,17 @@ export const SIMULATION_MODULES = [
     description: 'Kinematic motion graphs (position, velocity, acceleration vs. time) and their geometric relationships.',
     badge: 'Introductory',
   },
+  {
+    id: 'projectile-motion',
+    name: 'Projectile Motion',
+    category: 'Classical Mechanics',
+    path: '/sim/projectile-motion',
+    icon: Compass,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: '2D parabolic motion, trajectory predictions, maximum height, and horizontal range.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
