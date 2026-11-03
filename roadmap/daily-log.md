@@ -696,3 +696,30 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 28 — 2026-11-03
+
+- **Workflow run:** [#34](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/41603767749)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3.6-flash
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Gemini error output:** Warning: 256-color support not detected. Using a terminal with at least 256-color support is recommended for a better visual experience. Warning: --allowed-tools cli argument and tools.allowed in settings.json are deprecated and will be removed in 1.0: Migrate to Policy Engine: https://geminicli.com/docs/core/policy-engine/ YOLO mode is enabled. All tool calls will be automatically approved. YOLO mode is enabled. All tool calls will be automatically approved. Ripgrep is not available. Falling back to GrepTool. Error executing tool run_shell_command: Tool execution denied by policy. Attempt 1 failed: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit.  * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://ai.google.dev/gemini-api/docs/rate-limits. Please retry in 37.59875043s. Suggested retry after 37s.. Retrying after 37869ms...
+- **Gemini summary:** I have completed STEP 1 of 3 for concept 9 ("Relative motion").  ### Summary of Changes: 1. **`src/physics/mechanics/relative-motion.ts`**:    - Created pure TypeScript physics module defining `ObjectState`, `RelativeMotionParams`, `RelativeMotionResult`, and `DEFAULT_RELATIVE_MOTION_PARAMS`.    - Implemented `calculateRelativeMotion` to compute relative position, relative velocity, relative speed/distance, and time/distance at closest approach.    - Implemented `stepRelativeMotion` for forward state propagation over time `t`.    - Included conceptual documentation header with formulas.  2. **`src/tests/relative-motion.test.ts`**:    - Added 5 unit tests verifying 1D relative motion, 2D orthogonal relative velocity, minimum distance and closest approach calculations, zero relative velocity
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - `?? src/physics/mechanics/relative-motion.ts`
+  - `?? src/tests/relative-motion.test.ts`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-11-03T08:32:14.331Z
+  - **Current task:** Concept 9: physics module + tests done and verified
+  - **Last completed concept ID:** 8
+  - **Completed concepts:** 8
+  - **Notes:** Concept 9: physics module + tests was built and verified. The next run continues from the files on disk.
+
+---
+
