@@ -6,6 +6,7 @@ import { ProjectileMotionPage } from './simulations/projectile-motion/Projectile
 import { PositionDisplacementPage } from './simulations/position-displacement/PositionDisplacementPage';
 import { DistanceDisplacementPage } from './simulations/distance-versus-displacement/DistanceDisplacementPage';
 import { SpeedVelocityPage } from './simulations/speed-velocity/SpeedVelocityPage';
+import { RelativeMotionPage } from './simulations/relative-motion/RelativeMotionPage';
 import { UniformLinearMotionPage } from './simulations/uniform-linear-motion/UniformLinearMotionPage';
 import { AccelerationPage } from './simulations/acceleration/AccelerationPage';
 import { UniformlyAcceleratedMotionPage } from './simulations/uniformly-accelerated-motion/UniformlyAcceleratedMotionPage';
@@ -24,6 +25,7 @@ export const App: React.FC = () => {
         <Route path="/sim/position-displacement" element={<PositionDisplacementPage />} />
         <Route path="/sim/distance-versus-displacement" element={<DistanceDisplacementPage />} />
         <Route path="/sim/speed-and-velocity" element={<SpeedVelocityPage />} />
+        <Route path="/sim/relative-motion" element={<RelativeMotionPage />} />
         <Route path="/sim/uniform-linear-motion" element={<UniformLinearMotionPage />} />
         <Route path="/sim/acceleration" element={<AccelerationPage />} />
         <Route path="/sim/uniformly-accelerated-motion" element={<UniformlyAcceleratedMotionPage />} />

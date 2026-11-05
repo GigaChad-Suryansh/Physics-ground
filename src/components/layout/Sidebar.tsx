@@ -168,6 +168,17 @@ export const SIMULATION_MODULES = [
     description: '2D parabolic motion, trajectory predictions, maximum height, and horizontal range.',
     badge: 'Introductory',
   },
+  {
+    id: 'relative-motion',
+    name: 'Relative Motion',
+    category: 'Classical Mechanics',
+    path: '/sim/relative-motion',
+    icon: Compass,
+    color: 'text-purple-400',
+    bgColor: 'bg-purple-500/10',
+    description: 'Frame of reference, Galilean relativity transformations, 2D relative position and velocity vectors.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
