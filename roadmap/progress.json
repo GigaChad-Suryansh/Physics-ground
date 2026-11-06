@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 8,
+  "last_completed_id": 9,
   "completed_ids": [
     1,
     2,
@@ -9,16 +9,17 @@
     5,
     6,
     7,
-    8
+    8,
+    9
   ],
-  "current_task": "Concept 9: simulation page + registration done and verified",
-  "last_run": "2026-11-05T08:34:33.275Z",
+  "current_task": "Completed concept 9: Relative motion",
+  "last_run": "2026-11-06T08:30:48.610Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 9: simulation page + registration was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 9 (Relative motion) is integrated (physics module, page, route) and was marked complete by the workflow.",
   "last_failure": null
 }
