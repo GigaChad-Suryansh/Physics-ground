@@ -179,6 +179,17 @@ export const SIMULATION_MODULES = [
     description: 'Frame of reference, Galilean relativity transformations, 2D relative position and velocity vectors.',
     badge: 'Introductory',
   },
+  {
+    id: 'newton-s-first-law',
+    name: "Newton's First Law",
+    category: 'Classical Mechanics',
+    path: '/sim/newton-s-first-law',
+    icon: Gauge,
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    description: "Law of Inertia: velocity remains constant unless acted upon by a net external force (ΣF = 0).",
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
