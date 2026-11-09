@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 9,
+  "last_completed_id": 10,
   "completed_ids": [
     1,
     2,
@@ -10,16 +10,17 @@
     6,
     7,
     8,
-    9
+    9,
+    10
   ],
-  "current_task": "Concept 10: simulation page + registration done and verified",
-  "last_run": "2026-11-08T08:34:20.692Z",
+  "current_task": "Completed concept 10: Newton's first law",
+  "last_run": "2026-11-09T08:30:49.399Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 10: simulation page + registration was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 10 (Newton's first law) is integrated (physics module, page, route) and was marked complete by the workflow.",
   "last_failure": null
 }
