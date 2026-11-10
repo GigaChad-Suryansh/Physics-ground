@@ -878,3 +878,30 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 35 — 2026-11-10
+
+- **Workflow run:** [#41](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/42783156777)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3.6-flash
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Gemini error output:** Warning: 256-color support not detected. Using a terminal with at least 256-color support is recommended for a better visual experience. Warning: --allowed-tools cli argument and tools.allowed in settings.json are deprecated and will be removed in 1.0: Migrate to Policy Engine: https://geminicli.com/docs/core/policy-engine/ YOLO mode is enabled. All tool calls will be automatically approved. YOLO mode is enabled. All tool calls will be automatically approved. Ripgrep is not available. Falling back to GrepTool. Error executing tool run_shell_command: Tool execution denied by policy.
+- **Gemini summary:** Completed STEP 1 of 3 for Concept 11 ("Newton's second law"):  1. Created `src/physics/mechanics/newton-s-second-law.ts` with pure TypeScript calculations for net force, acceleration, friction, analytical kinematics, semi-implicit Euler stepping, and default parameters. 2. Created `src/tests/newton-s-second-law.test.ts` with unit tests validating theoretical acceleration ($a = F_{net}/m$), static and kinetic friction cases, analytical state evolution, step integration, and error handling for zero mass. 3. Verified full test suite (`7 passed, 93 tests`) and TypeScript build (`tsc && vite build`).
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - `?? src/physics/mechanics/newton-s-second-law.ts`
+  - `?? src/tests/newton-s-second-law.test.ts`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-11-10T08:32:16.507Z
+  - **Current task:** Concept 11: physics module + tests done and verified
+  - **Last completed concept ID:** 10
+  - **Completed concepts:** 10
+  - **Notes:** Concept 11: physics module + tests was built and verified. The next run continues from the files on disk.
+
+---
+
