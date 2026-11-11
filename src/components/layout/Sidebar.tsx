@@ -190,6 +190,17 @@ export const SIMULATION_MODULES = [
     description: "Law of Inertia: velocity remains constant unless acted upon by a net external force (ΣF = 0).",
     badge: 'Introductory',
   },
+  {
+    id: 'newton-s-second-law',
+    name: "Newton's Second Law",
+    category: 'Classical Mechanics',
+    path: '/sim/newton-s-second-law',
+    icon: Gauge,
+    color: 'text-amber-400',
+    bgColor: 'bg-amber-500/10',
+    description: 'Relationship between net force, mass, and acceleration (F_net = m * a) with friction.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
