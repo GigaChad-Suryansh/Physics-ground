@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 10,
+  "last_completed_id": 11,
   "completed_ids": [
     1,
     2,
@@ -11,16 +11,17 @@
     7,
     8,
     9,
-    10
+    10,
+    11
   ],
-  "current_task": "Concept 11: simulation page + registration done and verified",
-  "last_run": "2026-11-11T08:33:07.663Z",
+  "current_task": "Completed concept 11: Newton's second law",
+  "last_run": "2026-11-12T08:30:48.510Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 11: simulation page + registration was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 11 (Newton's second law) is integrated (physics module, page, route) and was marked complete by the workflow.",
   "last_failure": null
 }
