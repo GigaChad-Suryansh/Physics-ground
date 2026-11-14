@@ -13,6 +13,7 @@ import { UniformlyAcceleratedMotionPage } from './simulations/uniformly-accelera
 import { MotionGraphsPage } from './simulations/motion-graphs/MotionGraphsPage';
 import { NewtonSFirstLawPage } from './simulations/newton-s-first-law/NewtonSFirstLawPage';
 import { NewtonSSecondLawPage } from './simulations/newton-s-second-law/NewtonSSecondLawPage';
+import { NewtonSThirdLawPage } from './simulations/newton-s-third-law/NewtonSThirdLawPage';
 import { ForcesPage } from './simulations/forces/ForcesPage';
 import { OrbitalPage } from './simulations/orbital/OrbitalPage';
 import { WavesPage } from './simulations/waves/WavesPage';
@@ -34,6 +35,7 @@ export const App: React.FC = () => {
         <Route path="/sim/motion-graphs" element={<MotionGraphsPage />} />
         <Route path="/sim/newton-s-first-law" element={<NewtonSFirstLawPage />} />
         <Route path="/sim/newton-s-second-law" element={<NewtonSSecondLawPage />} />
+        <Route path="/sim/newton-s-third-law" element={<NewtonSThirdLawPage />} />
         <Route path="/sim/projectile" element={<LegacyProjectilePage />} />
         <Route path="/sim/projectile-motion" element={<ProjectileMotionPage />} />
         <Route path="/sim/forces" element={<ForcesPage />} />
