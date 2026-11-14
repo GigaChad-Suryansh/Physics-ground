@@ -201,6 +201,17 @@ export const SIMULATION_MODULES = [
     description: 'Relationship between net force, mass, and acceleration (F_net = m * a) with friction.',
     badge: 'Introductory',
   },
+  {
+    id: 'newton-s-third-law',
+    name: "Newton's Third Law",
+    category: 'Classical Mechanics',
+    path: '/sim/newton-s-third-law',
+    icon: Gauge,
+    color: 'text-purple-400',
+    bgColor: 'bg-purple-500/10',
+    description: 'Action and reaction force pairs (F_A_on_B = -F_B_on_A) and contact forces.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {

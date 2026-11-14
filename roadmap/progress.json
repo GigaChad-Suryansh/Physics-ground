@@ -14,14 +14,14 @@
     10,
     11
   ],
-  "current_task": "Concept 12: physics module + tests done and verified",
-  "last_run": "2026-11-13T08:37:11.111Z",
+  "current_task": "Concept 12: simulation page + registration done and verified",
+  "last_run": "2026-11-14T08:34:16.729Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 12: physics module + tests was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 12: simulation page + registration was built and verified. The next run continues from the files on disk.",
   "last_failure": null
 }
