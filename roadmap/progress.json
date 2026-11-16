@@ -15,14 +15,14 @@
     11,
     12
   ],
-  "current_task": "Completed concept 12: Newton's third law",
-  "last_run": "2026-11-15T08:30:58.707Z",
+  "current_task": "Concept 13: physics module + tests done and verified",
+  "last_run": "2026-11-16T08:38:35.622Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 12 (Newton's third law) is integrated (physics module, page, route) and was marked complete by the workflow.",
+  "notes": "Concept 13: physics module + tests was built and verified. The next run continues from the files on disk.",
   "last_failure": null
 }

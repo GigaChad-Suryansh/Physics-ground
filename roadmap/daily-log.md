@@ -1036,3 +1036,30 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 41 — 2026-11-16
+
+- **Workflow run:** [#47](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/43831748715)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3.6-flash
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Gemini error output:** Warning: 256-color support not detected. Using a terminal with at least 256-color support is recommended for a better visual experience. Warning: --allowed-tools cli argument and tools.allowed in settings.json are deprecated and will be removed in 1.0: Migrate to Policy Engine: https://geminicli.com/docs/core/policy-engine/ YOLO mode is enabled. All tool calls will be automatically approved. YOLO mode is enabled. All tool calls will be automatically approved. Ripgrep is not available. Falling back to GrepTool. Error executing tool run_shell_command: Tool execution denied by policy. Error executing tool run_shell_command: Tool execution denied by policy. Attempt 1 failed: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit.  * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits. Please retry in 12.123791545s. Suggested retry after 12s.. Retrying after 13205ms... (node:2795) MaxListenersExceededWarning: Possible EventTarget memory leak detected. 11 abort listeners added to [AbortSignal]. MaxListeners is 10. Use events.setMaxListeners() to increase limit (Use `node --trace-warnings ...` to show where the warning was created)
+- **Gemini summary:** I have completed STEP 1 of Concept 13 ("Free-body diagrams"):  1. Created pure TypeScript physics module `src/physics/mechanics/free-body-diagrams.ts`:    - Exported `FBDParams`, `FBDState`, `ForceVector`, `DEFAULT_FBD_PARAMS`, `calculateFBDState`, and `stepFBDMotion`.    - Documented force balance equations on inclined plane, normal forces, static/kinetic friction, and net force/acceleration vector calculations in header comments.  2. Created test suite `src/tests/free-body-diagrams.test.ts`:    - Added 6 vitest unit tests validating equilibrium on flat and inclined surfaces, static friction threshold, kinetic friction acceleration down incline, angled lifting forces, parameter validation, and numerical stepping against analytical solutions.  3. Validated with `npx tsc --noEmit` (0 errors
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - `?? src/physics/mechanics/free-body-diagrams.ts`
+  - `?? src/tests/free-body-diagrams.test.ts`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-11-16T08:38:35.622Z
+  - **Current task:** Concept 13: physics module + tests done and verified
+  - **Last completed concept ID:** 12
+  - **Completed concepts:** 12
+  - **Notes:** Concept 13: physics module + tests was built and verified. The next run continues from the files on disk.
+
+---
+
