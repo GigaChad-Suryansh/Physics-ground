@@ -212,6 +212,17 @@ export const SIMULATION_MODULES = [
     description: 'Action and reaction force pairs (F_A_on_B = -F_B_on_A) and contact forces.',
     badge: 'Introductory',
   },
+  {
+    id: 'free-body-diagrams',
+    name: 'Free-Body Diagrams',
+    category: 'Classical Mechanics',
+    path: '/sim/free-body-diagrams',
+    icon: Gauge,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: 'Vector representation of forces acting on a body on an inclined plane with gravity, normal force, applied force, and friction.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
