@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 12,
+  "last_completed_id": 13,
   "completed_ids": [
     1,
     2,
@@ -13,16 +13,17 @@
     9,
     10,
     11,
-    12
+    12,
+    13
   ],
-  "current_task": "Concept 13: simulation page + registration done and verified",
-  "last_run": "2026-11-17T08:35:23.567Z",
+  "current_task": "Completed concept 13: Free-body diagrams",
+  "last_run": "2026-11-18T08:31:02.633Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 13: simulation page + registration was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 13 (Free-body diagrams) is integrated (physics module, page, route) and was marked complete by the workflow.",
   "last_failure": null
 }
