@@ -1114,3 +1114,30 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 44 — 2026-11-19
+
+- **Workflow run:** [#50](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/44488164441)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3-flash-preview
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Gemini error output:** Warning: 256-color support not detected. Using a terminal with at least 256-color support is recommended for a better visual experience. Warning: --allowed-tools cli argument and tools.allowed in settings.json are deprecated and will be removed in 1.0: Migrate to Policy Engine: https://geminicli.com/docs/core/policy-engine/ YOLO mode is enabled. All tool calls will be automatically approved. YOLO mode is enabled. All tool calls will be automatically approved. Ripgrep is not available. Falling back to GrepTool. Error executing tool run_shell_command: Tool execution denied by policy. Attempt 1 failed: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit.  * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3-flash, description: Generate content requests per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits. Please retry in 11.677514288s. Suggested retry after 11s.. Retrying after 12495ms... (node:2919) MaxListenersExceededWarning: Possible EventTarget memory leak detected. 11 abort listeners added to [AbortSignal]. MaxListeners is 10. Use events.setMaxListeners() to increase limit (Use `node --trace-warnings ...` to show where the warning was created)
+- **Gemini summary:** I have completed **Step 1 of 3** for Concept 14, "Friction and inclined planes".  ### Changes Made: - **Core Physics Module**: Created `src/physics/mechanics/friction-and-inclined-planes.ts`. This module implements the physics of an object on an inclined plane, including:   - Calculation of normal force ($F_N = m \cdot g \cdot \cos\theta$) and parallel gravitational force ($F_{g,||} = m \cdot g \cdot \sin\theta$).   - Support for both static friction ($\mu_s$) and kinetic friction ($\mu_k$).   - Logic to determine if an object starts sliding or remains stationary based on the angle and friction coefficients.   - A `stepInclinedPlane` function for numerical simulation (semi-implicit Euler) and a `getAnalyticalState` function for exact solutions.   - Exported interfaces for parameters and st
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - `?? src/physics/mechanics/friction-and-inclined-planes.ts`
+  - `?? src/tests/friction-and-inclined-planes.test.ts`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-11-19T08:33:26.243Z
+  - **Current task:** Concept 14: physics module + tests done and verified
+  - **Last completed concept ID:** 13
+  - **Completed concepts:** 13
+  - **Notes:** Concept 14: physics module + tests was built and verified. The next run continues from the files on disk.
+
+---
+
