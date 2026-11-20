@@ -16,6 +16,7 @@ import { NewtonSSecondLawPage } from './simulations/newton-s-second-law/NewtonSS
 import { NewtonSThirdLawPage } from './simulations/newton-s-third-law/NewtonSThirdLawPage';
 import { ForcesPage } from './simulations/forces/ForcesPage';
 import { FreeBodyDiagramsPage } from './simulations/free-body-diagrams/FreeBodyDiagramsPage';
+import { FrictionAndInclinedPlanesPage } from './simulations/friction-and-inclined-planes/FrictionAndInclinedPlanesPage';
 import { OrbitalPage } from './simulations/orbital/OrbitalPage';
 import { WavesPage } from './simulations/waves/WavesPage';
 import { CircuitsPage } from './simulations/circuits/CircuitsPage';
@@ -41,6 +42,7 @@ export const App: React.FC = () => {
         <Route path="/sim/projectile-motion" element={<ProjectileMotionPage />} />
         <Route path="/sim/forces" element={<ForcesPage />} />
         <Route path="/sim/free-body-diagrams" element={<FreeBodyDiagramsPage />} />
+        <Route path="/sim/friction-and-inclined-planes" element={<FrictionAndInclinedPlanesPage />} />
         <Route path="/sim/orbital" element={<OrbitalPage />} />
         <Route path="/sim/waves" element={<WavesPage />} />
         <Route path="/sim/circuits" element={<CircuitsPage />} />
