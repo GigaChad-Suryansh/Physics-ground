@@ -223,6 +223,17 @@ export const SIMULATION_MODULES = [
     description: 'Vector representation of forces acting on a body on an inclined plane with gravity, normal force, applied force, and friction.',
     badge: 'Introductory',
   },
+  {
+    id: 'friction-and-inclined-planes',
+    name: 'Friction & Inclined Planes',
+    category: 'Classical Mechanics',
+    path: '/sim/friction-and-inclined-planes',
+    icon: SlidersHorizontal,
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    description: 'Static and kinetic friction on inclined surfaces. Analyze force components and sliding conditions.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
