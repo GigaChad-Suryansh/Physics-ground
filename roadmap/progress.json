@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 13,
+  "last_completed_id": 14,
   "completed_ids": [
     1,
     2,
@@ -14,16 +14,17 @@
     10,
     11,
     12,
-    13
+    13,
+    14
   ],
-  "current_task": "Concept 14: simulation page + registration done and verified",
-  "last_run": "2026-11-20T08:32:34.629Z",
+  "current_task": "Completed concept 14: Friction and inclined planes",
+  "last_run": "2026-11-21T08:31:06.495Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 14: simulation page + registration was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 14 (Friction and inclined planes) is integrated (physics module, page, route) and was marked complete by the workflow.",
   "last_failure": null
 }
