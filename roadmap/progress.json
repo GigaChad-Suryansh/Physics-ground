@@ -17,14 +17,14 @@
     13,
     14
   ],
-  "current_task": "Completed concept 14: Friction and inclined planes",
-  "last_run": "2026-11-21T08:31:06.495Z",
+  "current_task": "Concept 15: physics module + tests done and verified",
+  "last_run": "2026-11-22T08:34:04.383Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 14 (Friction and inclined planes) is integrated (physics module, page, route) and was marked complete by the workflow.",
+  "notes": "Concept 15: physics module + tests was built and verified. The next run continues from the files on disk.",
   "last_failure": null
 }

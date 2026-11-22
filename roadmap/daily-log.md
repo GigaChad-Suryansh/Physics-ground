@@ -1192,3 +1192,30 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 47 — 2026-11-22
+
+- **Workflow run:** [#53](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/45003114503)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3.6-flash
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** skipped
+- **Gemini error output:** Warning: 256-color support not detected. Using a terminal with at least 256-color support is recommended for a better visual experience. Warning: --allowed-tools cli argument and tools.allowed in settings.json are deprecated and will be removed in 1.0: Migrate to Policy Engine: https://geminicli.com/docs/core/policy-engine/ YOLO mode is enabled. All tool calls will be automatically approved. YOLO mode is enabled. All tool calls will be automatically approved. Ripgrep is not available. Falling back to GrepTool. Error executing tool run_shell_command: Tool execution denied by policy.
+- **Gemini summary:** Completed Step 1 of 3 for Concept 15 ("Circular motion and centripetal acceleration").  ### Summary of Changes: 1. Created `src/physics/mechanics/circular-motion-and-centripetal-acceleration.ts`:    - Pure TypeScript module defining uniform circular motion equations, parameters, state, and step function.    - Calculates angular velocity, tangential velocity, position, centripetal acceleration ($a_c = r\omega^2 = v^2/r$), centripetal force ($F_c = m a_c$), period ($T$), and frequency ($f$). 2. Created `src/tests/circular-motion-and-centripetal-acceleration.test.ts`:    - 5 Vitest unit tests verifying theoretical formulas, initial state, quarter-period kinematics, position/velocity orthogonality ($\mathbf{r} \cdot \mathbf{v} = 0$), position/acceleration antiparallel relation ($\mathbf{a} = -
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - `?? src/physics/mechanics/circular-motion-and-centripetal-acceleration.ts`
+  - `?? src/tests/circular-motion-and-centripetal-acceleration.test.ts`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-11-22T08:34:04.383Z
+  - **Current task:** Concept 15: physics module + tests done and verified
+  - **Last completed concept ID:** 14
+  - **Completed concepts:** 14
+  - **Notes:** Concept 15: physics module + tests was built and verified. The next run continues from the files on disk.
+
+---
+
