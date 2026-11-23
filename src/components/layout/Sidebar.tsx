@@ -234,6 +234,17 @@ export const SIMULATION_MODULES = [
     description: 'Static and kinetic friction on inclined surfaces. Analyze force components and sliding conditions.',
     badge: 'Introductory',
   },
+  {
+    id: 'circular-motion-and-centripetal-acceleration',
+    name: 'Circular Motion & Acceleration',
+    category: 'Classical Mechanics',
+    path: '/sim/circular-motion-and-centripetal-acceleration',
+    icon: Orbit,
+    color: 'text-rose-400',
+    bgColor: 'bg-rose-500/10',
+    description: 'Uniform circular motion, angular velocity, tangential velocity, centripetal acceleration and force.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
