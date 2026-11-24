@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 14,
+  "last_completed_id": 15,
   "completed_ids": [
     1,
     2,
@@ -15,16 +15,17 @@
     11,
     12,
     13,
-    14
+    14,
+    15
   ],
-  "current_task": "Concept 15: simulation page + registration done and verified",
-  "last_run": "2026-11-23T08:33:42.701Z",
+  "current_task": "Completed concept 15: Circular motion and centripetal acceleration",
+  "last_run": "2026-11-24T08:31:00.541Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 15: simulation page + registration was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 15 (Circular motion and centripetal acceleration) is integrated (physics module, page, route) and was marked complete by the workflow.",
   "last_failure": null
 }
