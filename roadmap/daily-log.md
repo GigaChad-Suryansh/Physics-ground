@@ -1271,3 +1271,30 @@ Each entry records one GitHub Actions run. Persistent state lives in progress.js
 
 ---
 
+## Day 50 — 2026-11-25
+
+- **Workflow run:** [#56](https://github.com/GigaChad-Suryansh/Physics-ground/actions/runs/45576852269)
+- **Trigger:** workflow_dispatch
+- **Gemini status:** success
+- **Gemini model:** gemini-3.6-flash
+- **Baseline tests exit code:** 0 (0 = passed)
+- **Baseline build exit code:** 0 (0 = passed)
+- **Independent verification (build + tests):** passed
+- **Repair attempt:** failure
+- **Gemini error output:** Warning: 256-color support not detected. Using a terminal with at least 256-color support is recommended for a better visual experience. Warning: --allowed-tools cli argument and tools.allowed in settings.json are deprecated and will be removed in 1.0: Migrate to Policy Engine: https://geminicli.com/docs/core/policy-engine/ YOLO mode is enabled. All tool calls will be automatically approved. YOLO mode is enabled. All tool calls will be automatically approved. Ripgrep is not available. Falling back to GrepTool. Error executing tool run_shell_command: Tool execution denied by policy.
+- **Gemini summary:** I have completed Step 1 of Concept 16 ("Centripetal force and banked roads"):  1. **Physics Engine Module** (`src/physics/mechanics/centripetal-force-and-banked-roads.ts`):    - Implemented parameter types, state interfaces, defaults, and physical calculation functions for circular banked turns.    - Formulated analytical formulas for ideal design speed $v_{\text{ideal}} = \sqrt{g R \tan\theta}$, minimum speed $v_{\text{min}}$, maximum speed $v_{\text{max}}$, normal force $N$, centripetal force $F_c$, required static friction force $f_{\text{req}}$, and slide direction identification.  2. **Unit Tests** (`src/tests/centripetal-force-and-banked-roads.test.ts`):    - Created Vitest tests validating ideal banked speed, flat road limits, inward sliding on steep banks at low speeds, outward sli
+- **Changes present after verification:**
+  - ` M roadmap/progress.json`
+  - `?? src/physics/mechanics/centripetal-force-and-banked-roads.ts`
+  - `?? src/tests/centripetal-force-and-banked-roads.test.ts`
+
+- **Saved progress snapshot:**
+  - **Last outcome:** success
+  - **Last run:** 2026-11-25T08:34:56.842Z
+  - **Current task:** Concept 16: physics module + tests done and verified
+  - **Last completed concept ID:** 15
+  - **Completed concepts:** 15
+  - **Notes:** Concept 16: physics module + tests was built and verified. The next run continues from the files on disk.
+
+---
+
