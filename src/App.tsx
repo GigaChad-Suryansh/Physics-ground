@@ -18,6 +18,7 @@ import { ForcesPage } from './simulations/forces/ForcesPage';
 import { FreeBodyDiagramsPage } from './simulations/free-body-diagrams/FreeBodyDiagramsPage';
 import { FrictionAndInclinedPlanesPage } from './simulations/friction-and-inclined-planes/FrictionAndInclinedPlanesPage';
 import { CircularMotionAndCentripetalAccelerationPage } from './simulations/circular-motion-and-centripetal-acceleration/CircularMotionAndCentripetalAccelerationPage';
+import { CentripetalForceAndBankedRoadsPage } from './simulations/centripetal-force-and-banked-roads/CentripetalForceAndBankedRoadsPage';
 import { OrbitalPage } from './simulations/orbital/OrbitalPage';
 import { WavesPage } from './simulations/waves/WavesPage';
 import { CircuitsPage } from './simulations/circuits/CircuitsPage';
@@ -45,6 +46,7 @@ export const App: React.FC = () => {
         <Route path="/sim/free-body-diagrams" element={<FreeBodyDiagramsPage />} />
         <Route path="/sim/friction-and-inclined-planes" element={<FrictionAndInclinedPlanesPage />} />
         <Route path="/sim/circular-motion-and-centripetal-acceleration" element={<CircularMotionAndCentripetalAccelerationPage />} />
+        <Route path="/sim/centripetal-force-and-banked-roads" element={<CentripetalForceAndBankedRoadsPage />} />
         <Route path="/sim/orbital" element={<OrbitalPage />} />
         <Route path="/sim/waves" element={<WavesPage />} />
         <Route path="/sim/circuits" element={<CircuitsPage />} />
