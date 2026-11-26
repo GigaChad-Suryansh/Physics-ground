@@ -245,6 +245,17 @@ export const SIMULATION_MODULES = [
     description: 'Uniform circular motion, angular velocity, tangential velocity, centripetal acceleration and force.',
     badge: 'Introductory',
   },
+  {
+    id: 'centripetal-force-and-banked-roads',
+    name: 'Banked Roads',
+    category: 'Classical Mechanics',
+    path: '/sim/centripetal-force-and-banked-roads',
+    icon: Orbit,
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/10',
+    description: 'Centripetal force on banked curves. Analyze ideal speed, friction requirements, and sliding limits.',
+    badge: 'Introductory',
+  },
 ];
 
 interface SidebarProps {
