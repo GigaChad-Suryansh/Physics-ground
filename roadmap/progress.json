@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0.0",
-  "last_completed_id": 15,
+  "last_completed_id": 16,
   "completed_ids": [
     1,
     2,
@@ -16,16 +16,17 @@
     12,
     13,
     14,
-    15
+    15,
+    16
   ],
-  "current_task": "Concept 16: simulation page + registration done and verified",
-  "last_run": "2026-11-26T08:43:03.707Z",
+  "current_task": "Completed concept 16: Centripetal force and banked roads",
+  "last_run": "2026-11-27T08:31:13.028Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 16: simulation page + registration was built and verified. The next run continues from the files on disk.",
+  "notes": "Concept 16 (Centripetal force and banked roads) is integrated (physics module, page, route) and was marked complete by the workflow.",
   "last_failure": null
 }
