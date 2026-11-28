@@ -19,14 +19,14 @@
     15,
     16
   ],
-  "current_task": "Completed concept 16: Centripetal force and banked roads",
-  "last_run": "2026-11-27T08:31:13.028Z",
+  "current_task": "Concept 17: physics module + tests done and verified",
+  "last_run": "2026-11-28T08:34:16.143Z",
   "last_outcome": "success",
   "known_bugs": [],
   "blocked_concepts": [],
   "consecutive_failures": 0,
   "latest_pull_request": null,
   "latest_deployment": null,
-  "notes": "Concept 16 (Centripetal force and banked roads) is integrated (physics module, page, route) and was marked complete by the workflow.",
+  "notes": "Concept 17: physics module + tests was built and verified. The next run continues from the files on disk.",
   "last_failure": null
 }
